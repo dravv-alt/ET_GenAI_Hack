@@ -28,15 +28,18 @@ def retrieve(sub_queries: list[str], portfolio: list, market_context: list = Non
                     break
 
         # Fetch news for this query
-        news_results = search_news(query, max_results=3)
-        for article in news_results:
-            context_docs.append({
-                "content": f"[NEWS] {article['title']}\n{article['content'][:500]}",
-                "url": article['url'],
-                "source_type": "news",
-                "ticker": ticker,
-                "query": query,
-            })
+        try:
+            news_results = search_news(query, max_results=3)
+            for article in news_results:
+                context_docs.append({
+                    "content": f"[NEWS] {article['title']}\n{article['content'][:500]}",
+                    "url": article['url'],
+                    "source_type": "news",
+                    "ticker": ticker,
+                    "query": query,
+                })
+        except Exception as e:
+            print(f"Warning: News fetch failed for [{query}] - {e}")
 
         # Fetch fundamentals if ticker identified
         if ticker:

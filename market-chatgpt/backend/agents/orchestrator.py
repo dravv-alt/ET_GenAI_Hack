@@ -38,7 +38,11 @@ async def run(question: str, portfolio: list, market_context: list, history: lis
         yield f"data: {json.dumps({'type': 'thinking', 'content': f'Fetching data for {len(sub_queries)} queries...'})}\n\n"
 
         # 2. Retrieve context
-        context_docs = retrieve(sub_queries, portfolio, market_context)
+        try:
+            context_docs = retrieve(sub_queries, portfolio, market_context)
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'content': f'Retrieval Error: {str(e)}'})}\n\n"
+            context_docs = []
 
         # Build prompt variables
         portfolio_str = "\n".join([
@@ -65,12 +69,12 @@ async def run(question: str, portfolio: list, market_context: list, history: lis
             for m in history[-3:]  # last 3 turns
         ]) if history else "No previous history."
 
-        prompt = ANALYSIS_PROMPT.format(
-            question=question,
-            portfolio_str=portfolio_str,
-            context_str=context_str,
-            history_str=history_str
-        )
+        market_str = portfolio_str + ("\n" if portfolio_str else "") + "No specific filters"
+        
+        prompt = ANALYSIS_PROMPT.replace('{question}', str(question))\
+                                .replace('{market_str}', str(market_str))\
+                                .replace('{context_str}', str(context_str))\
+                                .replace('{history_str}', str(history_str))
 
         yield f"data: {json.dumps({'type': 'thinking', 'content': 'Generating analysis...'})}\n\n"
 

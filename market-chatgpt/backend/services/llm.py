@@ -1,8 +1,8 @@
 import os
 from groq import AsyncGroq, Groq
 
-# Use llama3-70b-8192 for high reasoning capabilities by default
-GROQ_MODEL = "llama3-70b-8192"
+# Use llama-3.3-70b-versatile for high reasoning capabilities by default
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 def get_groq_client():
     api_key = os.getenv("GROQ_API_KEY")
