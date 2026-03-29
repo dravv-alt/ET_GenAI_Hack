@@ -49,7 +49,7 @@ export function PortfolioUploader({ data, onDataParsed }) {
   if (data) {
     return (
       <div style={{ padding: 14 }}>
-        <BacktestStats summary={data.summary} />
+        <BacktestStats summary={data.summary} holdings={data.holdings} />
         <div style={{ marginTop: 14 }}>
             <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-muted)', letterSpacing: '0.10em' }}>HOLDINGS BREAKDOWN</span>
         </div>
@@ -102,7 +102,7 @@ export function PortfolioUploader({ data, onDataParsed }) {
   );
 }
 
-function BacktestStats({ summary }) {
+function BacktestStats({ summary, holdings }) {
   const isPositive = summary.total_pnl_pct >= 0;
   const pnlColor = isPositive ? 'var(--green)' : 'var(--red)';
 
@@ -113,8 +113,19 @@ function BacktestStats({ summary }) {
     { label: "P&L (%)", value: `${isPositive ? '+' : ''}${summary.total_pnl_pct.toFixed(2)}%`, color: pnlColor },
   ];
 
+  if (holdings && holdings.length > 0 && summary.total_current_value > 0) {
+    const sorted = [...holdings].sort((a, b) => b.value - a.value);
+    const top2Value = (sorted[0]?.value || 0) + (sorted[1]?.value || 0);
+    const concentration = (top2Value / summary.total_current_value) * 100;
+    stats.push({ 
+      label: "CONC. RISK", 
+      value: `${concentration.toFixed(1)}%`, 
+      color: concentration > 50 ? 'var(--amber)' : 'var(--text-primary)' 
+    });
+  }
+
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', border: '1px solid var(--border)' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${stats.length}, 1fr)`, border: '1px solid var(--border)' }}>
       {stats.map((s, i) => (
         <div key={i} style={{
           padding: '10px 12px',

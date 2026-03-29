@@ -117,6 +117,23 @@ export function ChatWindow({ portfolio, marketContext }) {
           />
           <button 
             disabled={isLoading}
+            onClick={() => {
+              const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+              if (!SpeechRecognition) return alert("Voice input not supported in this browser.");
+              const recognition = new SpeechRecognition();
+              recognition.onresult = (e) => setInput(e.results[0][0].transcript);
+              recognition.start();
+            }}
+            style={{
+              background: 'transparent', border: 'none', color: '#888',
+              width: 28, height: 28, cursor: 'pointer', fontSize: 14,
+            }}
+            title="Voice Input"
+          >
+            🎤
+          </button>
+          <button 
+            disabled={isLoading}
             onClick={() => sendMessage()}
             style={{
               background: isLoading ? 'var(--header-muted)' : 'var(--green)', border: 'none', color: '#fff',

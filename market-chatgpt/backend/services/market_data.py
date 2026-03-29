@@ -5,9 +5,6 @@ def get_fundamentals(ticker: str) -> dict:
     Fetch market fundamentals for a given ticker symbol.
     """
     try:
-        if not ticker.endswith('.NS'):
-            ticker += '.NS'
-            
         stock = yf.Ticker(ticker)
         info = getattr(stock, 'info', {})
         

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 import csv, io, yfinance as yf, time
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 
@@ -20,8 +21,6 @@ async def parse_portfolio(file: UploadFile = File(...)):
     holdings = []
     for i, row in enumerate(reader, start=2):
         ticker = row['ticker'].strip().upper()
-        if not ticker.endswith('.NS'):
-            ticker += '.NS'
 
         try:
             qty = int(row['quantity'])
@@ -64,3 +63,28 @@ async def parse_portfolio(file: UploadFile = File(...)):
             "holdings_count": len(holdings),
         }
     }
+
+class QuestionRequest(BaseModel):
+    tickers: list[str]
+
+@router.post("/questions")
+async def generate_questions(req: QuestionRequest):
+    from services.llm import call_llm
+    import json
+    
+    if not req.tickers:
+        return {"questions": ["What is the market doing today?", "Which sectors are hot right now?", "Are there any strong buy signals?"]}
+        
+    tickers_str = ", ".join(req.tickers[:10])
+    prompt = f"The user holds these stocks: {tickers_str}. Generate exactly 5 personalized investment questions they might ask about their portfolio right now. Return ONLY a valid JSON array of 5 strings. Do not include markdown formatting or ANY other text. Example: [\"Is Apple at risk?\", \"Should I buy more NVDA?\"]"
+    try:
+        res = call_llm(prompt)
+        clean = res.strip()
+        if clean.startswith("```json"): clean = clean[7:]
+        if clean.startswith("```"): clean = clean[3:]
+        if clean.endswith("```"): clean = clean[:-3]
+        questions = json.loads(clean.strip())
+        return {"questions": questions}
+    except Exception as e:
+        print("Error generating questions:", e)
+        return {"questions": ["Which of my holdings are at risk this quarter?", "Which stock in my portfolio has the strongest buy signal?", "Should I rebalance my portfolio?"]}

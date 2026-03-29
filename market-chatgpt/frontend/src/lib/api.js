@@ -17,8 +17,8 @@ export const parsePortfolio = async (file) => {
   return await res.json();
 };
 
-export const fetchMarketData = async () => {
-  const res = await fetch(`${API_BASE}/market/live`);
+export const fetchMarketData = async (exchange = 'NIFTY') => {
+  const res = await fetch(`${API_BASE}/market/live?exchange=${exchange}`);
   if (!res.ok) {
     const error = await res.text();
     throw new Error(error || 'Failed to fetch live market data');

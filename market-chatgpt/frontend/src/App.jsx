@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { MarketDashboard } from './components/MarketDashboard';
 import { ChatWindow } from './components/ChatWindow';
+import { PortfolioUploader } from './components/PortfolioUploader';
+import { TopIndexBar } from './components/TopIndexBar';
 
 function App() {
   const [marketContext, setMarketContext] = useState([]);
+  const [portfolioData, setPortfolioData] = useState(null);
   
   // Header component following Bloomberg Spec
   const Header = () => (
@@ -28,10 +31,13 @@ function App() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
       <Header />
+      <TopIndexBar />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         
         {/* Left/Main Panel: Live Dashboard */}
         <div style={{ width: '45%', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--bg-white)', transition: 'width 0.2s' }}>
+          
+          <PortfolioUploader data={portfolioData} onDataParsed={setPortfolioData} />
           <div style={{
             padding: '6px 12px',
             background: 'var(--header-sub)',
@@ -69,7 +75,7 @@ function App() {
               CONTEXT: {marketContext.length} TICKERS
             </span>
           </div>
-          <ChatWindow portfolio={[]} marketContext={marketContext} />
+          <ChatWindow portfolio={portfolioData ? portfolioData.holdings : []} marketContext={marketContext} />
         </div>
         
       </div>
