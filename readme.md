@@ -201,7 +201,20 @@ python -c "import yfinance as yf; print(yf.Ticker('RELIANCE.NS').fast_info)"
 
 ## How products connect for the demo
 
-The 4 products are **independent** and demoed separately. For the final pitch:
+The 4 products are **independent** and demoed separately. However, we have also built a unified **Master Terminal Hub** to showcase them together seamlessly.
+
+### Using the Master Terminal Hub (et-genai-hub)
+To demo all four products within a single interface:
+1. Ensure all 4 independent FastAPI backends are running on their usual ports.
+2. Ensure all 4 Vite frontends are running on their assigned ports (`3001` - `3004`).
+3. Open a new terminal and run the Hub:
+```bash
+cd et-genai-hub
+npm run dev
+```
+4. Navigate to the Hub's URL (e.g. `localhost:5173`) to view the unified tabbed interface containing all 4 isolated products!
+
+For the final pitch:
 
 - **T4 (Demo Lead)** runs a unified demo that shows all 4 products back to back
 - Each product runs on its own port: Radar=3001, Charts=3002, ChatGPT=3003, Video=3004
