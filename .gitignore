@@ -1,0 +1,19 @@
+# Node
+node_modules/
+
+# Vite/React builds
+dist/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.env/
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db

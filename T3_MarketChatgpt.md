@@ -41,6 +41,8 @@ market-chatgpt/
 ├── backend/
 │   ├── main.py                        ← FastAPI app (port 8003)
 │   ├── requirements.txt
+│   ├── db/                            ← SQLite helpers + schema
+│   ├── data/                          ← small JSON fallbacks for dev
 │   │
 │   ├── routes/
 │   │   ├── portfolio.py               ← POST /parse-portfolio
@@ -56,7 +58,7 @@ market-chatgpt/
 │   ├── services/
 │   │   ├── market_data.py             ← yfinance: price, OHLCV, fundamentals
 │   │   ├── news_fetcher.py            ← Tavily: recent news per ticker
-│   │   ├── rag.py                     ← ChromaDB: RAG over NSE filings
+│   │   ├── rag.py                     ← Lightweight SQLite RAG store
 │   │   └── llm.py                     ← LLM client + all prompt templates
 │   │
 │   └── models/
@@ -64,27 +66,27 @@ market-chatgpt/
 │       └── chat.py                    ← Pydantic: ChatRequest, Message, SSEEvent
 │
 └── frontend/
-    ├── package.json
-    ├── next.config.js
-    ├── tailwind.config.js
-    └── app/
-        ├── layout.tsx
-        ├── page.tsx                   ← Portfolio upload landing page
-        ├── chat/page.tsx              ← Main chat interface
-        └── globals.css
-    └── components/
-        ├── PortfolioUploader.tsx      ← CSV drag-drop + holdings table display
-        ├── HoldingsTable.tsx          ← Table: ticker, qty, avg buy, current, P&L
-        ├── ChatWindow.tsx             ← SSE streaming chat container
-        ├── MessageBubble.tsx          ← One message: text + source chips
-        ├── SignalCard.tsx             ← Bullish/bearish card inline in chat
-        ├── SourceChip.tsx             ← Clickable citation badge
-        ├── ThinkingIndicator.tsx      ← "Analyzing your portfolio..." spinner
-        └── SuggestedQuestions.tsx     ← Pre-set questions based on portfolio
+  ├── index.html
+  ├── package.json
+  ├── vite.config.js
+  ├── tailwind.config.js
+  ├── public/
+  └── src/
+    ├── main.jsx
+    ├── App.jsx                    ← Portfolio upload + chat router
+    ├── styles.css
+    ├── components/
+    │   ├── PortfolioUploader.jsx  ← CSV drag-drop + holdings table display
+    │   ├── HoldingsTable.jsx      ← Table: ticker, qty, avg buy, current, P&L
+    │   ├── ChatWindow.jsx         ← SSE streaming chat container
+    │   ├── MessageBubble.jsx      ← One message: text + source chips
+    │   ├── SignalCard.jsx         ← Bullish/bearish card inline in chat
+    │   ├── SourceChip.jsx         ← Clickable citation badge
+    │   ├── ThinkingIndicator.jsx  ← "Analyzing your portfolio..." spinner
+    │   └── SuggestedQuestions.jsx ← Pre-set questions based on portfolio
     └── lib/
-        ├── api.ts
-        ├── types.ts
-        └── mockData.ts
+      ├── api.js
+      └── mockData.js
 ```
 
 ---
@@ -93,14 +95,14 @@ market-chatgpt/
 
 ### H0–H1: Setup + models + mock data
 
-**Goal:** Next.js running at 3003, FastAPI at 8003. Frontend can show mock chat.
+**Goal:** Vite React running at 3003, FastAPI at 8003. Frontend can show mock chat.
 
 ```bash
 # Backend
 cd market-chatgpt/backend
 python -m venv venv && source venv/bin/activate
 pip install fastapi uvicorn python-multipart yfinance pandas anthropic openai \
-            langchain chromadb tavily-python python-dotenv
+            langchain tavily-python python-dotenv
 uvicorn main:app --reload --port 8003
 
 # Frontend
@@ -428,10 +430,10 @@ async def run(question: str, portfolio: list, history: list):
 
 ### H6–H8: Frontend chat UI
 
-**ChatWindow.tsx — SSE streaming:**
+**ChatWindow.jsx — SSE streaming:**
 
-```tsx
-// components/ChatWindow.tsx
+```jsx
+// src/components/ChatWindow.jsx
 'use client';
 import { useState, useRef } from 'react';
 
@@ -515,8 +517,8 @@ export function ChatWindow({ portfolio }) {
 
 **SuggestedQuestions component — shows based on portfolio:**
 
-```tsx
-// components/SuggestedQuestions.tsx
+```jsx
+// src/components/SuggestedQuestions.jsx
 const QUESTION_TEMPLATES = [
   "Which of my holdings are at risk this quarter based on recent earnings?",
   "Which stock in my portfolio has the strongest buy signal right now?",

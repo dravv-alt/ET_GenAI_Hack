@@ -1,0 +1,10 @@
+# Backend dependencies for Market Video Engine
+fastapi
+uvicorn
+yfinance
+pandas
+matplotlib
+pillow
+moviepy
+gTTS
+python-dotenv

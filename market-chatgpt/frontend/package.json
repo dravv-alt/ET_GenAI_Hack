@@ -1,0 +1,18 @@
+{
+  "name": "market-chatgpt-frontend",
+  "version": "0.1.0",
+  "description": "Vite React (JSX) frontend for Market ChatGPT",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

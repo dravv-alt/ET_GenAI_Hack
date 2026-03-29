@@ -36,6 +36,8 @@ opportunity-radar/
 ├── backend/
 │   ├── main.py                        ← FastAPI app entrypoint (port 8001)
 │   ├── requirements.txt
+│   ├── db/                            ← SQLite helpers + schema
+│   ├── data/                          ← small JSON fallbacks for dev
 │   │
 │   ├── routes/
 │   │   ├── alerts.py                  ← GET /alerts, GET /alerts/{ticker}
@@ -53,32 +55,32 @@ opportunity-radar/
 │   ├── services/
 │   │   ├── nse_client.py              ← All NSE public API calls
 │   │   ├── llm_analyzer.py            ← LLM calls for text analysis + signal extraction
-│   │   └── alert_store.py             ← In-memory alert cache (dict, no DB needed)
+│   │   └── alert_store.py             ← SQLite-backed alert cache
 │   │
 │   └── models/
 │       ├── alert.py                   ← Pydantic: Alert, SignalStrength, AlertType
 │       └── watchlist.py               ← Pydantic: Watchlist, WatchlistItem
 │
 └── frontend/
+    ├── index.html
     ├── package.json
-    ├── next.config.js
+    ├── vite.config.js
     ├── tailwind.config.js
-    │
-    └── app/
-        ├── layout.tsx
-        ├── page.tsx                   ← Main alert feed page
-        └── globals.css
-    └── components/
-        ├── AlertFeed.tsx              ← Ranked list of alerts with filters
-        ├── AlertCard.tsx              ← Single alert: signal type, ticker, why it matters
-        ├── SignalBadge.tsx            ← High / Medium / Low badge
-        ├── WatchlistPanel.tsx         ← Sidebar: manage your tracked stocks
-        ├── ScanProgress.tsx           ← Progress bar while AI scans stocks
-        └── SourceLink.tsx             ← Clickable NSE/news source citation
-    └── lib/
-        ├── api.ts                     ← All fetch calls to backend
-        ├── types.ts                   ← TypeScript interfaces matching Pydantic models
-        └── mockData.ts                ← Mock alerts for UI dev (use until H5)
+    ├── public/
+    └── src/
+        ├── main.jsx
+        ├── App.jsx                    ← Main alert feed page
+        ├── styles.css
+        ├── components/
+        │   ├── AlertFeed.jsx          ← Ranked list of alerts with filters
+        │   ├── AlertCard.jsx          ← Single alert: signal type, ticker, why it matters
+        │   ├── SignalBadge.jsx        ← High / Medium / Low badge
+        │   ├── WatchlistPanel.jsx     ← Sidebar: manage your tracked stocks
+        │   ├── ScanProgress.jsx       ← Progress bar while AI scans stocks
+        │   └── SourceLink.jsx         ← Clickable NSE/news source citation
+        └── lib/
+            ├── api.js                 ← All fetch calls to backend
+            └── mockData.js            ← Mock alerts for UI dev (use until H5)
 ```
 
 ---
@@ -87,7 +89,7 @@ opportunity-radar/
 
 ### H0–H1: Setup and skeleton
 
-**Goal:** Running FastAPI server + Next.js app, both starting without errors.
+**Goal:** Running FastAPI server + Vite React app, both starting without errors.
 
 ```bash
 # Terminal 1: Backend
@@ -104,8 +106,8 @@ npm install && npm run dev -- --port 3001
 Tasks:
 - [ ] `main.py` with CORS, health endpoint at `GET /health`
 - [ ] `models/alert.py` — write Pydantic models first (types guide everything)
-- [ ] `frontend/lib/mockData.ts` — hardcode 5 fake alerts so you can build UI immediately
-- [ ] `frontend/lib/api.ts` — create `USE_MOCK = true` flag so T3 can build without backend
+- [ ] `frontend/src/lib/mockData.js` — hardcode 5 fake alerts so you can build UI immediately
+- [ ] `frontend/src/lib/api.js` — create `USE_MOCK = true` flag so T3 can build without backend
 
 **Done when:** `curl http://localhost:8001/health` returns `{"status":"ok"}` and `localhost:3001` loads.
 
@@ -370,20 +372,10 @@ async def trigger_scan(watchlist: list[str]):
     return {"status": "complete", "alerts_found": len(results)}
 ```
 
-**Frontend alert feed (`components/AlertFeed.tsx`):**
+**Frontend alert feed (`src/components/AlertFeed.jsx`):**
 
-```tsx
-// components/AlertCard.tsx
-interface Alert {
-  ticker: string;
-  alert_type: string;
-  signal_strength: 'high' | 'medium' | 'low';
-  title: string;
-  why_it_matters: string;
-  action_hint: string;
-  source_url: string;
-  source_label: string;
-}
+```jsx
+// src/components/AlertCard.jsx
 
 const SIGNAL_COLORS = {
   high: 'bg-green-100 text-green-800 border-green-200',
@@ -391,7 +383,7 @@ const SIGNAL_COLORS = {
   low: 'bg-gray-100 text-gray-700 border-gray-200',
 };
 
-export function AlertCard({ alert }: { alert: Alert }) {
+export function AlertCard({ alert }) {
   return (
     <div className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-3">

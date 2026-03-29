@@ -1,0 +1,2 @@
+-- SQLite schema for Opportunity Radar cached alerts and watchlist
+-- TODO: create tables for alerts and watchlist.

@@ -3,7 +3,7 @@
 > **Hackathon:** ET AI Hackathon 2026 | Avataar.ai + Unstop
 > **Problem Statement:** #6 — AI for the Indian Investor
 > **Team size:** 4 members | **Duration:** 12 hours
-> **Stack:** Python 3.11 + FastAPI · Next.js 14 · React · TailwindCSS
+> **Stack:** Python 3.11 + FastAPI · React (JSX) · Vite · TailwindCSS · SQLite
 
 ---
 
@@ -46,22 +46,96 @@ et-ai-hackathon-ps6/
 ├── opportunity-radar/                 ← T1's product
 │   ├── README.md                      ← T1's full guide (start here if you're T1)
 │   ├── backend/
+│   │   ├── main.py                     ← FastAPI entrypoint
+│   │   ├── requirements.txt
+│   │   ├── db/                         ← SQLite helpers + schema
+│   │   ├── data/                       ← small JSON fallbacks for dev
+│   │   ├── routes/
+│   │   ├── agents/
+│   │   ├── services/
+│   │   └── models/
 │   └── frontend/
+│       ├── index.html
+│       ├── package.json
+│       ├── vite.config.js
+│       ├── public/
+│       └── src/
+│           ├── main.jsx
+│           ├── App.jsx
+│           ├── components/
+│           ├── lib/
+│           └── styles.css
 │
 ├── chart-pattern-intel/               ← T2's product
 │   ├── README.md                      ← T2's full guide
 │   ├── backend/
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   ├── db/
+│   │   ├── data/
+│   │   ├── routes/
+│   │   ├── detectors/
+│   │   ├── backtester/
+│   │   ├── services/
+│   │   └── models/
 │   └── frontend/
+│       ├── index.html
+│       ├── package.json
+│       ├── vite.config.js
+│       ├── public/
+│       └── src/
+│           ├── main.jsx
+│           ├── App.jsx
+│           ├── components/
+│           ├── lib/
+│           └── styles.css
 │
 ├── market-chatgpt/                    ← T3's product
 │   ├── README.md                      ← T3's full guide
 │   ├── backend/
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   ├── db/
+│   │   ├── data/
+│   │   ├── routes/
+│   │   ├── agents/
+│   │   ├── services/
+│   │   └── models/
 │   └── frontend/
+│       ├── index.html
+│       ├── package.json
+│       ├── vite.config.js
+│       ├── public/
+│       └── src/
+│           ├── main.jsx
+│           ├── App.jsx
+│           ├── components/
+│           ├── lib/
+│           └── styles.css
 │
 ├── market-video-engine/               ← T4's product
 │   ├── README.md                      ← T4's full guide
 │   ├── backend/
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   ├── db/
+│   │   ├── data/
+│   │   ├── routes/
+│   │   ├── generators/
+│   │   ├── rendering/
+│   │   ├── services/
+│   │   └── models/
 │   └── frontend/
+│       ├── index.html
+│       ├── package.json
+│       ├── vite.config.js
+│       ├── public/
+│       └── src/
+│           ├── main.jsx
+│           ├── App.jsx
+│           ├── components/
+│           ├── lib/
+│           └── styles.css
 │
 └── docs/
     ├── ARCHITECTURE.md                ← Full system design for all 4 products
@@ -103,15 +177,17 @@ TAVILY_API_KEY=tvly-xxxxx                    # News search — free 1000/month
 
 ```bash
 pip install fastapi uvicorn yfinance pandas ta-lib requests python-dotenv \
-            anthropic openai langchain chromadb tavily-python pillow \
+            anthropic openai langchain tavily-python pillow \
             moviepy matplotlib plotly
+
+# SQLite (standard library) is used for fast local storage in all backends
 ```
 
 ### 4. Install Node shared deps (per frontend)
 
 ```bash
 cd <product>/frontend
-npm install     # package.json is pre-configured per product
+npm install     # Vite + React (JSX) setup per product
 ```
 
 ### 5. Verify everything works

@@ -37,6 +37,8 @@ chart-pattern-intel/
 ├── backend/
 │   ├── main.py                        ← FastAPI app entrypoint (port 8002)
 │   ├── requirements.txt
+│   ├── db/                            ← SQLite helpers + schema
+│   ├── data/                          ← small JSON fallbacks for dev
 │   │
 │   ├── routes/
 │   │   ├── patterns.py                ← GET /patterns/{ticker} — main endpoint
@@ -64,25 +66,26 @@ chart-pattern-intel/
 │       └── chart_data.py              ← Pydantic: OHLCV, ChartResponse
 │
 └── frontend/
+    ├── index.html
     ├── package.json
-    ├── next.config.js
+    ├── vite.config.js
     ├── tailwind.config.js
-    └── app/
-        ├── layout.tsx
-        ├── page.tsx                   ← Ticker search input + pattern report
-        └── globals.css
-    └── components/
-        ├── TickerSearch.tsx            ← Autocomplete search for NSE tickers
-        ├── CandlestickChart.tsx        ← TradingView-style chart using lightweight-charts
-        ├── PatternOverlay.tsx          ← Draws pattern markings on the chart
-        ├── PatternCard.tsx             ← One pattern: name, description, stats, entry/SL/TP
-        ├── BacktestStats.tsx           ← Win rate bar, avg gain/loss, sample count
-        ├── ExplanationPanel.tsx        ← LLM-generated plain-English explanation
-        └── LevelMarkers.tsx            ← S/R levels displayed on chart
-    └── lib/
-        ├── api.ts
-        ├── types.ts
-        └── mockData.ts                ← Mock pattern data for UI dev
+    ├── public/
+    └── src/
+        ├── main.jsx
+        ├── App.jsx                    ← Ticker search input + pattern report
+        ├── styles.css
+        ├── components/
+        │   ├── TickerSearch.jsx        ← Autocomplete search for NSE tickers
+        │   ├── CandlestickChart.jsx    ← TradingView-style chart using lightweight-charts
+        │   ├── PatternOverlay.jsx      ← Draws pattern markings on the chart
+        │   ├── PatternCard.jsx         ← One pattern: name, description, stats, entry/SL/TP
+        │   ├── BacktestStats.jsx       ← Win rate bar, avg gain/loss, sample count
+        │   ├── ExplanationPanel.jsx    ← LLM-generated plain-English explanation
+        │   └── LevelMarkers.jsx        ← S/R levels displayed on chart
+        └── lib/
+            ├── api.js
+            └── mockData.js             ← Mock pattern data for UI dev
 ```
 
 ---
@@ -382,11 +385,11 @@ def explain_pattern(ticker, pattern_name, current_price, entry_price,
     return call_llm(prompt)
 ```
 
-**Frontend chart (`components/CandlestickChart.tsx`):**
+**Frontend chart (`src/components/CandlestickChart.jsx`):**
 
-```tsx
+```jsx
 // Install: npm install lightweight-charts
-// components/CandlestickChart.tsx
+// src/components/CandlestickChart.jsx
 'use client';
 import { useEffect, useRef } from 'react';
 import { createChart, CrosshairMode } from 'lightweight-charts';

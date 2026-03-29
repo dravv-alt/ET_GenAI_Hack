@@ -40,6 +40,8 @@ market-video-engine/
 ├── backend/
 │   ├── main.py                        ← FastAPI app (port 8004)
 │   ├── requirements.txt
+│   ├── db/                            ← SQLite helpers + schema
+│   ├── data/                          ← small JSON fallbacks for dev
 │   │
 │   ├── routes/
 │   │   └── video.py                   ← POST /generate — main video generation endpoint
@@ -66,23 +68,24 @@ market-video-engine/
 │       └── video.py                   ← Pydantic: VideoRequest, VideoType, VideoStatus
 │
 └── frontend/
-    ├── package.json
-    ├── next.config.js
-    ├── tailwind.config.js
-    └── app/
-        ├── layout.tsx
-        ├── page.tsx                   ← Main page: video type selector + preview
-        └── globals.css
-    └── components/
-        ├── VideoTypeSelector.tsx       ← 4 cards: pick your video type
-        ├── VideoPreview.tsx            ← Video player with download button
-        ├── GenerationProgress.tsx      ← Step-by-step progress: data → frames → audio → mp4
-        ├── MarketDataPreview.tsx       ← Shows what data will go into the video
-        └── ScriptPreview.tsx          ← Shows the LLM-generated narration script
+  ├── index.html
+  ├── package.json
+  ├── vite.config.js
+  ├── tailwind.config.js
+  ├── public/
+  └── src/
+    ├── main.jsx
+    ├── App.jsx                    ← Main page: video type selector + preview
+    ├── styles.css
+    ├── components/
+    │   ├── VideoTypeSelector.jsx   ← 4 cards: pick your video type
+    │   ├── VideoPreview.jsx        ← Video player with download button
+    │   ├── GenerationProgress.jsx  ← Step-by-step progress: data → frames → audio → mp4
+    │   ├── MarketDataPreview.jsx   ← Shows what data will go into the video
+    │   └── ScriptPreview.jsx      ← Shows the LLM-generated narration script
     └── lib/
-        ├── api.ts
-        ├── types.ts
-        └── mockData.ts
+      ├── api.js
+      └── mockData.js
 ```
 
 ---
@@ -512,9 +515,9 @@ async def download_video(filename: str):
     return FileResponse(path, media_type="video/mp4", filename="et-market-update.mp4")
 ```
 
-**Frontend generator page (`app/page.tsx`):**
+**Frontend generator page (`src/App.jsx`):**
 
-```tsx
+```jsx
 // Key component: VideoTypeSelector + GenerationProgress + VideoPreview
 'use client';
 import { useState } from 'react';
