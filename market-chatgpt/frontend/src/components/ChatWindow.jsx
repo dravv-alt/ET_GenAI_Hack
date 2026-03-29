@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { MessageBubble } from './MessageBubble';
 import { SuggestedQuestions } from './SuggestedQuestions';
 
-export function ChatWindow({ portfolio }) {
+export function ChatWindow({ portfolio, marketContext }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +30,8 @@ export function ChatWindow({ portfolio }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           question: userMessage, 
-          portfolio,
+          portfolio: portfolio || [],
+          market_context: marketContext || [],
           conversation_history: newMessages.slice(-5) 
         }),
       });

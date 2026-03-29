@@ -1,13 +1,15 @@
 from services.market_data import get_fundamentals
 from services.news_fetcher import search_news
 
-def retrieve(sub_queries: list[str], portfolio: list) -> list[dict]:
+def retrieve(sub_queries: list[str], portfolio: list, market_context: list = None) -> list[dict]:
     """
     For each sub-query: fetch price data + news + fundamentals.
     Returns list of context docs with: content, url, source_type, ticker
     """
     context_docs = []
     tickers_in_portfolio = {h['ticker'] for h in portfolio}
+    if market_context:
+        tickers_in_portfolio.update({m['ticker'] + '.NS' for m in market_context})
 
     for query in sub_queries:
         # Find which ticker this query is about
@@ -17,7 +19,7 @@ def retrieve(sub_queries: list[str], portfolio: list) -> list[dict]:
                 ticker = t
                 break
                 
-        # If no explicit ticker found, guess if any ticker from portfolio is substring
+        # If no explicit ticker found, guess if any ticker from portfolio/market is substring
         if not ticker:
             for t in tickers_in_portfolio:
                 base_t = t.split('.')[0].lower()

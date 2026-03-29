@@ -14,11 +14,16 @@ Example output: ["RELIANCE.NS Q3 FY24 earnings results", "INFY.NS revenue guidan
 Maximum {max_queries} sub-queries.
 """
 
-def plan(question: str, portfolio: list, max_queries: int = 4) -> list[str]:
+def plan(question: str, portfolio: list, market_context: list = None, max_queries: int = 4) -> list[str]:
     tickers = [h['ticker'] for h in portfolio]
+    if market_context:
+        tickers.extend([m['ticker'] + ".NS" for m in market_context])
+    # deduplicate
+    tickers = list(set(tickers))
+    
     prompt = PLANNER_PROMPT.format(
         question=question,
-        tickers=", ".join(tickers),
+        tickers=", ".join(tickers) if tickers else "The general Indian market",
         max_queries=max_queries,
     )
     

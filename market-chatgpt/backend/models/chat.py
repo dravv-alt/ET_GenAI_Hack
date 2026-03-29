@@ -24,7 +24,15 @@ class Holding(BaseModel):
     quantity: int
     avg_buy_price: float
 
+class MarketData(BaseModel):
+    ticker: str
+    current_price: float
+    pnl_abs: float
+    pnl_pct: float
+    volume: int | None = None
+
 class ChatRequest(BaseModel):
     question: str
-    portfolio: list[Holding]
+    portfolio: list[Holding] = [] # Optional fallback
+    market_context: list[MarketData] = []
     conversation_history: list[Message] = []

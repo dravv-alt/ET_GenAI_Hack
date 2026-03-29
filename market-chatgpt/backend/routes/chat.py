@@ -11,10 +11,12 @@ async def chat_endpoint(request: ChatRequest):
     """
     # Converting Pydantic models to dicts for the orchestration agent
     portfolio_dicts = [h.dict() for h in request.portfolio]
+    market_dicts = [m.dict() for m in request.market_context]
     history_dicts = [m.dict() for m in request.conversation_history]
     
     return await run(
         question=request.question,
         portfolio=portfolio_dicts,
+        market_context=market_dicts,
         history=history_dicts
     )

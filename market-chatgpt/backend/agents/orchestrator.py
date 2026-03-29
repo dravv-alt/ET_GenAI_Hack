@@ -5,11 +5,11 @@ from agents.query_planner import plan
 from agents.retrieval_agent import retrieve
 
 ANALYSIS_PROMPT = """
-You are a senior equity analyst at India's top brokerage.
+You are a senior equity analyst and live market omniscient advisor at India's top brokerage.
 The user's question: {question}
 
-Their portfolio:
-{portfolio_str}
+Their active context (Live Dashboard filters or Portfolio):
+{market_str}
 
 Market data and news retrieved (use ONLY these facts — do not add facts you don't see here):
 {context_str}
@@ -18,33 +18,42 @@ Conversation history:
 {history_str}
 
 Instructions:
-1. Answer the question directly and specifically — mention the user's actual holdings and the news snippets provided.
+1. Answer the question directly and specifically based on the context above.
 2. Use real numbers from the data above. Never fabricate statistics.
-3. For each stock you discuss, include a SIGNAL: bullish/bearish/neutral and 2-3 short reasons.
-4. Keep your total answer under 350 words.
+3. For each specific stock you discuss, try to include a SIGNAL: bullish/bearish/neutral and 1-2 reasons.
+4. Keep your total answer under 350 words. Focus on insight rather than reciting.
 5. After your answer, output a JSON block like this (EXACTLY this format on its own line):
    SIGNALS_JSON: [{{"ticker": "RELIANCE.NS", "signal": "bullish", "confidence": 0.84, "reasons": ["reason1", "reason2"]}}]
 """
 
-async def run(question: str, portfolio: list, history: list):
+async def run(question: str, portfolio: list, market_context: list, history: list):
 
     async def event_stream():
         yield f"data: {json.dumps({'type': 'thinking', 'content': 'Planning analysis...'})}\n\n"
 
         # 1. Plan
-        sub_queries = plan(question, portfolio)
+        sub_queries = plan(question, portfolio, market_context)
         tickers_mentioned = set(q.split('.NS')[0].split()[0] for q in sub_queries)
 
         yield f"data: {json.dumps({'type': 'thinking', 'content': f'Fetching data for {len(sub_queries)} queries...'})}\n\n"
 
         # 2. Retrieve context
-        context_docs = retrieve(sub_queries, portfolio)
+        context_docs = retrieve(sub_queries, portfolio, market_context)
 
         # Build prompt variables
         portfolio_str = "\n".join([
-            f"- {h['ticker']}: {h['quantity']} shares @ avg ₹{h['avg_buy_price']} (current ₹{h.get('current_price', '?')})"
+            f"- [PORTFOLIO] {h['ticker']}: {h['quantity']} shares @ avg ₹{h['avg_buy_price']}"
             for h in portfolio
         ])
+
+        market_context_str = "\n".join([
+            f"- [DASHBOARD] {m['ticker']} (LTP: ₹{m['current_price']}, Chg: {m['pnl_pct']}%)"
+            for m in market_context[:40] # cap the context so we don't blow context sizes
+        ])
+
+        market_str = portfolio_str + ("\n" if portfolio_str and market_context_str else "") + market_context_str
+        if not market_str.strip():
+            market_str = "No specific portfolio or dashboard filters active."
         
         context_str = "\n\n".join([
             f"[{doc['source_type'].upper()}] ({doc.get('ticker','?')}): {doc['content']}"

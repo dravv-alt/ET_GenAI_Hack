@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { PortfolioUploader } from './components/PortfolioUploader';
+import { MarketDashboard } from './components/MarketDashboard';
 import { ChatWindow } from './components/ChatWindow';
 
 function App() {
-  const [portfolioData, setPortfolioData] = useState(null);
-
+  const [marketContext, setMarketContext] = useState([]);
+  
   // Header component following Bloomberg Spec
   const Header = () => (
     <div style={{
@@ -30,8 +30,8 @@ function App() {
       <Header />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         
-        {/* Left/Main Panel: Portfolio Details */}
-        <div style={{ width: portfolioData ? '400px' : '100%', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--bg-white)', transition: 'width 0.2s' }}>
+        {/* Left/Main Panel: Live Dashboard */}
+        <div style={{ width: '45%', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--bg-white)', transition: 'width 0.2s' }}>
           <div style={{
             padding: '6px 12px',
             background: 'var(--header-sub)',
@@ -41,32 +41,36 @@ function App() {
             alignItems: 'center',
           }}>
             <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#aaa', letterSpacing: '0.10em' }}>
-              PORTFOLIO STATE
+              LIVE MARKET DASHBOARD (NIFTY 100)
+            </span>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--green)' }}>
+              CONNECTED
             </span>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            <PortfolioUploader data={portfolioData} onDataParsed={setPortfolioData} />
+          <div style={{ flex: 1, overflowY: 'hidden' }}>
+            <MarketDashboard onContextChange={setMarketContext} />
           </div>
         </div>
 
         {/* Right Panel: Chat Stream (Bloomberg Chat Spec) */}
-        {portfolioData && (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
-            <div style={{
-              padding: '6px 12px',
-              background: 'var(--header-sub)',
-              borderBottom: '1px solid var(--border-header)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#aaa', letterSpacing: '0.10em' }}>
-                AI ADVISOR TERMINAL
-              </span>
-            </div>
-            <ChatWindow portfolio={portfolioData.holdings} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
+          <div style={{
+            padding: '6px 12px',
+            background: 'var(--header-sub)',
+            borderBottom: '1px solid var(--border-header)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#aaa', letterSpacing: '0.10em' }}>
+              AGENTS: OMNISCIENT TERMINAL
+            </span>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#aaa' }}>
+              CONTEXT: {marketContext.length} TICKERS
+            </span>
           </div>
-        )}
+          <ChatWindow portfolio={[]} marketContext={marketContext} />
+        </div>
         
       </div>
     </div>
