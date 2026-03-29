@@ -1,0 +1,26 @@
+{
+  "id": "426729b1-3bda-4f31-90a6-710af920e47a",
+  "ticker": "RELIANCE",
+  "alert_type": "insider_buy",
+  "signal_strength": "high",
+  "title": "MUKESH D AMBANI (Promoter) bought \u00e2\u0082\u00b9124cr of RELIANCE",
+  "why_it_matters": "Promoter increased holding from 50.21% to 50.28% (+0.070%). This is a strong vote of confidence from someone with the deepest knowledge of the company.",
+  "action_hint": "Promoter accumulation is one of the most reliable bullish signals. Review price levels and consider position sizing carefully.",
+  "source_url": "https://www.nseindia.com/companies-listing/corporate-filings/insider-trading/RELIANCE",
+  "source_label": "NSE SAST Disclosures",
+  "raw_data": {
+    "symbol": "RELIANCE",
+    "acquirer_name": "MUKESH D AMBANI",
+    "acquirer_type": "Promoter",
+    "transaction_type": "Buy",
+    "shares": 500000,
+    "price_per_share": 2475.0,
+    "value_cr": 123.75,
+    "pre_holding_pct": 50.21,
+    "post_holding_pct": 50.28,
+    "date": "2026-03-25",
+    "mode": "Market Purchase",
+    "filing_ref": "SAST-REL-2026-031"
+  },
+  "created_at": "2026-03-29T17:15:36.956387"
+}
