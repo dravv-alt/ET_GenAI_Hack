@@ -1,12 +1,20 @@
-# Opportunity Radar — Backend
+# Opportunity Radar 📡
 
-AI-powered NSE signal detector. Surfaces non-obvious investment opportunities from corporate filings, bulk deals, insider trades, and LLM-based sentiment shift detection.
+**Opportunity Radar** is an AI-powered financial signal detection engine. It continuously monitors the Indian stock market (NSE) to surface non-obvious, high-conviction investment opportunities. Instead of relying solely on price action, this module acts as a programmatic analyst—reading corporate filings, tracking insider trades, and analyzing management commentary using Large Language Models (LLMs) to detect sentiment shifts before they reflect in the stock price.
+
+### 🌟 Key Capabilities
+- **Insider Activity Tracking (SAST):** Automatically detects when company promoters or insiders are buying or selling significant chunks of their own stock. (e.g., "Promoter bought ₹124cr of equity").
+- **Institutional Flow Detection:** Scans for major Bulk/Block deals indicating institutional accumulation or distribution.
+- **Fundamental Triggers:** Parses quarterly results and corporate actions to flag "Earnings Beats", "Earnings Misses", or major "CapEx Announcements".
+- **AI Sentiment Analysis:** Uses LLM integration (Gemini 2.0 / Groq) to read through management commentary or press releases, quantifying subtle shifts in business outlook or management tone.
+- **Automated Ranking Engine:** Deduplicates overlapping signals and ranks them by institutional weight (High, Medium, Low) to prevent alert fatigue.
+- **Bloomberg-Style Terminal:** Comes with a fully responsive, ultra-high-density `React` frontend that visualizes these signals directly on a live candlestick chart, mimicking professional trading terminals.
 
 **Port:** `8001` | **DB:** SQLite (`db/radar.db`) | **LLM:** Gemini 2.0 Flash (free) + Groq fallback
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
 cd opportunity-radar/backend
@@ -19,9 +27,9 @@ venv\Scripts\activate          # Windows
 # Install dependencies
 pip install -r requirements.txt
 
-# Set up API keys (copy from shared/.env.example)
-cp ../../shared/.env.example ../../shared/.env
-# Edit shared/.env and add:
+# Set up API keys
+cp .env.example .env
+# Edit .env and add:
 #   GEMINI_API_KEY=your-key   → https://aistudio.google.com/apikey (free)
 #   GROQ_API_KEY=your-key     → https://console.groq.com/keys (free)
 
@@ -37,9 +45,11 @@ curl http://localhost:8001/health
 
 **Swagger UI:** http://localhost:8001/docs
 
+> **Note:** The backend uses CORS to allow all origins by default. To view the full Bloomberg-style interface, ensure you also start the React frontend in `opportunity-radar/frontend/` using `npm run dev`.
+
 ---
 
-## API Endpoints
+## 🛠 API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -72,7 +82,7 @@ curl -X POST http://localhost:8001/watchlist \
 
 ---
 
-## Architecture
+## 🏗 Architecture & Core Flow
 
 ```
 POST /scan
@@ -91,7 +101,7 @@ GET /alerts → alert_store.get_cached_alerts() → ranked JSON response
 
 ---
 
-## File Structure
+## 📂 File Structure
 
 ```
 backend/
@@ -133,7 +143,7 @@ backend/
 
 ---
 
-## Signal Types
+## 📊 Supported Signal Types
 
 | Alert Type | Trigger | Strength |
 |-----------|---------|---------|
@@ -148,21 +158,22 @@ backend/
 
 ---
 
-## Environment Variables
+## 🔑 Environment Variables
 
-Add to `shared/.env`:
+Create `.env` in the `backend/` root:
 
 ```env
+# Optional LLM Analysis Keys:
 GEMINI_API_KEY=your-gemini-key    # Free at: https://aistudio.google.com/apikey
 GROQ_API_KEY=your-groq-key        # Free at: https://console.groq.com/keys
-LLM_MODEL=gemini-2.0-flash        # Default Gemini model
+LLM_MODEL=gemini-2.0-flash        # Default LLM used by Sentiment Scanner
 ```
 
-> **Note:** Both keys are optional — if neither is set, the sentiment scanner is skipped and all other scanners still run using fallback data.
+> **Note:** Both keys are optional — if neither is set, the sentiment scanner is gracefully skipped, and all other scanners (insider, bulk, earnings) still run efficiently using fallbacks.
 
 ---
 
-## NSE API Fallbacks
+## 🛡️ NSE API Fallbacks (Offline Dev)
 
 NSE public APIs frequently return 403 errors to non-browser clients.  
 Every NSE call falls back to pre-loaded JSON files in `data/`:
