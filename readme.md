@@ -1,247 +1,104 @@
-# ET AI Hackathon 2026 — PS 6: AI for the Indian Investor
+# ET AI Terminal Hub — AI for the Indian Investor
 
 > **Hackathon:** ET AI Hackathon 2026 | Avataar.ai + Unstop
 > **Problem Statement:** #6 — AI for the Indian Investor
-> **Team size:** 4 members | **Duration:** 12 hours
-> **Stack:** Python 3.11 + FastAPI · React (JSX) · Vite · TailwindCSS · SQLite
+> **Team size:** 4 members | **Duration:** 12-hour build
 
 ---
 
-## Overview
+## 📖 The Narrative: What We Are Solving
 
-This repo contains **4 independent AI products** built in parallel by 4 teammates.
-Each product solves a different piece of PS 6. They share a common tech stack
-and a shared `/shared/` utilities folder, but are otherwise fully independent —
-one teammate going down does NOT block others.
+Indian retail investors face a severely fragmented digital ecosystem. To make an informed trade, an everyday investor has to cross-reference static OHLCV charts from their broker, read scattered news articles on financial portals, and manually dig through complex NSE corporate filings. This disjointed experience is overwhelming and leads to missed opportunities that institutional investors capitalize on instantly.
 
----
+**Our solution is the ET AI Terminal Hub.** 
 
-## The 4 products
-
-| # | Product | Teammate | Folder | Status |
-|---|---------|----------|--------|--------|
-| 1 | **Opportunity Radar** | T1 | `/opportunity-radar/` | 🔴 Todo |
-| 2 | **Chart Pattern Intelligence** | T2 | `/chart-pattern-intel/` | 🔴 Todo |
-| 3 | **Market ChatGPT — Next Gen** | T3 | `/market-chatgpt/` | 🔴 Todo |
-| 4 | **AI Market Video Engine** | T4 | `/market-video-engine/` | 🔴 Todo |
-
-> Update status as you build: 🔴 Todo → 🟡 In Progress → 🟢 Done
+We have built an institutional-grade, AI-native financial terminal tailored specifically for the Indian investor. By combining blazing-fast Large Language Models (LLMs), Python-driven data scraping, and a sleek Bloomberg-inspired React interface, we've created a unified dashboard that automates qualitative and quantitative analysis.
 
 ---
 
-## Repository structure
+## 🚀 App Overview & End-to-End Workflow
 
-```
-et-ai-hackathon-ps6/
-│
-├── README.md                          ← YOU ARE HERE
-│
-├── shared/                            ← Shared utilities (all teammates use this)
-│   ├── market_data.py                 ← yfinance wrapper (OHLCV, fundamentals)
-│   ├── nse_fetcher.py                 ← NSE public API helpers
-│   ├── llm_client.py                  ← LLM wrapper (Claude / GPT-4o)
-│   ├── news_search.py                 ← Tavily API news search
-│   └── .env.example                   ← All API keys needed across all products
-│
-├── opportunity-radar/                 ← T1's product
-│   ├── README.md                      ← T1's full guide (start here if you're T1)
-│   ├── backend/
-│   │   ├── main.py                     ← FastAPI entrypoint
-│   │   ├── requirements.txt
-│   │   ├── db/                         ← SQLite helpers + schema
-│   │   ├── data/                       ← small JSON fallbacks for dev
-│   │   ├── routes/
-│   │   ├── agents/
-│   │   ├── services/
-│   │   └── models/
-│   └── frontend/
-│       ├── index.html
-│       ├── package.json
-│       ├── vite.config.js
-│       ├── public/
-│       └── src/
-│           ├── main.jsx
-│           ├── App.jsx
-│           ├── components/
-│           ├── lib/
-│           └── styles.css
-│
-├── chart-pattern-intel/               ← T2's product
-│   ├── README.md                      ← T2's full guide
-│   ├── backend/
-│   │   ├── main.py
-│   │   ├── requirements.txt
-│   │   ├── db/
-│   │   ├── data/
-│   │   ├── routes/
-│   │   ├── detectors/
-│   │   ├── backtester/
-│   │   ├── services/
-│   │   └── models/
-│   └── frontend/
-│       ├── index.html
-│       ├── package.json
-│       ├── vite.config.js
-│       ├── public/
-│       └── src/
-│           ├── main.jsx
-│           ├── App.jsx
-│           ├── components/
-│           ├── lib/
-│           └── styles.css
-│
-├── market-chatgpt/                    ← T3's product
-│   ├── README.md                      ← T3's full guide
-│   ├── backend/
-│   │   ├── main.py
-│   │   ├── requirements.txt
-│   │   ├── db/
-│   │   ├── data/
-│   │   ├── routes/
-│   │   ├── agents/
-│   │   ├── services/
-│   │   └── models/
-│   └── frontend/
-│       ├── index.html
-│       ├── package.json
-│       ├── vite.config.js
-│       ├── public/
-│       └── src/
-│           ├── main.jsx
-│           ├── App.jsx
-│           ├── components/
-│           ├── lib/
-│           └── styles.css
-│
-├── market-video-engine/               ← T4's product
-│   ├── README.md                      ← T4's full guide
-│   ├── backend/
-│   │   ├── main.py
-│   │   ├── requirements.txt
-│   │   ├── db/
-│   │   ├── data/
-│   │   ├── routes/
-│   │   ├── generators/
-│   │   ├── rendering/
-│   │   ├── services/
-│   │   └── models/
-│   └── frontend/
-│       ├── index.html
-│       ├── package.json
-│       ├── vite.config.js
-│       ├── public/
-│       └── src/
-│           ├── main.jsx
-│           ├── App.jsx
-│           ├── components/
-│           ├── lib/
-│           └── styles.css
-│
-└── docs/
-    ├── ARCHITECTURE.md                ← Full system design for all 4 products
-    ├── API_CONTRACTS.md               ← All endpoints across all 4 products
-    ├── KICKOFF_CHECKLIST.md           ← First 30 minutes before coding
-    ├── TIMELINE.md                    ← Hour-by-hour plan for all 4 teammates
-    └── IMPACT_MODEL.md                ← Quantified business impact (submission req)
-```
+The platform operates as a massive Master Terminal Hub (`et-genai-hub`) that seamlessly houses 4 proprietary, parallel AI engines. Each engine solves a distinct piece of the investment life-cycle, and together they form an unstoppable retail investing suite:
+
+### 1. Opportunity Radar (The Scout)
+Instead of forcing investors to read complex PDFs, our AI agents continuously scan the NSE for bulk deals, insider trading, and corporate sentiment shifts. Using LLM-driven analytics, it ranks these events and surfaces non-obvious trading signals in a sleek, real-time alert feed.
+
+### 2. Chart Pattern Intelligence (The Analyst)
+A fully automated visual technical analysis engine. It instantly detects complex setups (Breakouts, Head & Shoulders, Support/Resistance) and calculates momentum indicators. More importantly, it dynamically backtests these patterns against historical data so you know exactly what your statistical edge is before you trade.
+
+### 3. Market ChatGPT — Next Gen (The Advisor)
+A completely voice-enabled conversational AI terminal deeply integrated with live global market data (via yFinance) and real-time news (via DuckDuckGo). Users can upload their latest Portfolio CSVs, and the AI will critically analyze their holdings, calculate concentration risk scores, and suggest personalized, actionable investment questions.
+
+### 4. AI Market Video Engine (The Synthesizer)
+Not everyone wants to read charts at the end of the day. This generative engine takes the closing market performance and autonomously synthesizes a daily "Market Wrap" video, complete with trending sector rotation visuals, race charts, and multi-lingual Text-to-Speech (TTS) narrations.
 
 ---
 
-## Shared setup (everyone does this first — H0 to H0:30)
+## 🛠 Tech Stack
 
-### 1. Clone repo and install shared deps
+- **Backend:** Python 3.11 + FastAPI + SQLite (for high-speed local data caching).
+- **Frontend:** React (JSX) + Vite + Standard CSS (Institutional Bloomberg Monochrome aesthetic).
+- **AI Infrastructure:** Groq (Llama-3), Anthropic (Claude), and OpenAI (GPT-4o).
+- **Data Layers:** `yfinance` (Global market data), `nse_fetcher` (Indian public APIs), and `duckduckgo-search` (Unlimited, keyless news retrieval).
 
-```bash
-git clone https://github.com/dravv-alt/ET_GenAI_Hack.git
-cd ET_GenAI_Hack
-cp shared/.env.example shared/.env
-# Fill in your API keys in shared/.env
-```
+---
 
-### 2. Shared environment variables
+## ⚙️ Environment Variables (.env)
+
+Before starting the applications, create a `.env` file in the `/shared/` directory.
+
+We have heavily optimized our dependencies to rely on free, public APIs wherever possible. **You do NOT need a Tavily key for news anymore, as we upgraded the system to use keyless DuckDuckGo search!**
 
 ```env
-# shared/.env — fill these in before ANYONE starts coding
+# shared/.env
 
-ANTHROPIC_API_KEY=sk-ant-api03-xxxxx        # LLM (preferred)
-OPENAI_API_KEY=sk-xxxxx                      # LLM (fallback)
-LLM_MODEL=claude-sonnet-4-20250514           # or: gpt-4o
+# 1. LLM Providers (Provide the ones you wish to use)
+ANTHROPIC_API_KEY=sk-ant-api03-xxxxx        # Preferred logic engine
+OPENAI_API_KEY=sk-proj-xxxxx                 # Fallback engine
+GROQ_API_KEY=gsk_xxxxx                       # Used for blazing fast portfolio analysis QA
 
-TAVILY_API_KEY=tvly-xxxxx                    # News search — free 1000/month
-                                             # Sign up: app.tavily.com
-
-# No other API keys needed — yfinance and NSE are free/public
-```
-
-### 3. Install Python shared deps
-
-```bash
-pip install fastapi uvicorn yfinance pandas ta-lib requests python-dotenv \
-            anthropic openai langchain tavily-python pillow \
-            moviepy matplotlib plotly
-
-# SQLite (standard library) is used for fast local storage in all backends
-```
-
-### 4. Install Node shared deps (per frontend)
-
-```bash
-cd <product>/frontend
-npm install     # Vite + React (JSX) setup per product
-```
-
-### 5. Verify everything works
-
-```bash
-python -c "import yfinance as yf; print(yf.Ticker('RELIANCE.NS').fast_info)"
-# Should print Reliance's current price info
+# Note: yfinance, NSE, and DuckDuckGo news operate completely free and require no keys.
 ```
 
 ---
 
-## How products connect for the demo
+## 💻 Running the Master Terminal Hub
 
-The 4 products are **independent** and demoed separately. However, we have also built a unified **Master Terminal Hub** to showcase them together seamlessly.
+The 4 products run effectively as micro-services. To experience the full Terminal Hub:
 
-### Using the Master Terminal Hub (et-genai-hub)
-To demo all four products within a single interface:
-1. Ensure all 4 independent FastAPI backends are running on their usual ports.
-2. Ensure all 4 Vite frontends are running on their assigned ports (`3001` - `3004`).
-3. Open a new terminal and run the Hub:
+### Step 1: Install Dependencies
+```bash
+# Python dependencies
+pip install fastapi uvicorn yfinance pandas ta-lib requests python-dotenv \
+            anthropic openai langchain duckduckgo-search pillow moviepy
+
+# Run 'npm install' inside the 4 frontend folders + the hub
+```
+
+### Step 2: Boot the AI Backends
+Open 4 separate terminal tabs and spin up the FastAPI services for each engine:
+```bash
+cd opportunity-radar/backend && uvicorn main:app --port 8001
+cd chart-pattern-intel/backend && uvicorn main:app --port 8002
+cd market-chatgpt/backend && uvicorn main:app --port 8003
+cd market-video-engine/backend && uvicorn main:app --port 8004
+```
+
+### Step 3: Boot the Vite Frontends
+Open 4 more terminal tabs and boot their respective UIs:
+```bash
+cd opportunity-radar/frontend && npm run dev -- --port 3001
+cd chart-pattern-intel/frontend && npm run dev -- --port 3002
+cd market-chatgpt/frontend && npm run dev -- --port 3003
+cd market-video-engine/frontend && npm run dev -- --port 3004
+```
+
+### Step 4: Launch the Unified Demo Hub
+Finally, launch the master iframe shell that ties them all together beautifully into one UI:
 ```bash
 cd et-genai-hub
 npm run dev
 ```
-4. Navigate to the Hub's URL (e.g. `localhost:5173`) to view the unified tabbed interface containing all 4 isolated products!
+Navigate to your **et-genai-hub URL (usually `http://localhost:5173`)**. 
 
-For the final pitch:
-
-- **T4 (Demo Lead)** runs a unified demo that shows all 4 products back to back
-- Each product runs on its own port: Radar=3001, Charts=3002, ChatGPT=3003, Video=3004
-- The 3-minute video shows each product completing its core workflow
-
----
-
-## Sync checkpoints
-
-| Time | What to share | Format |
-|------|--------------|--------|
-| H3 | Each person demos their MVP skeleton | 2 min screen share each |
-| H6 | Core feature working | 2 min demo each |
-| H9 | Full flow working, demo dry run | 5 min full walkthrough |
-| H11 | Record pitch video, final push | All together |
-
----
-
-## Submission requirements checklist
-
-- [ ] Public GitHub repo with full commit history showing 12-hour build
-- [ ] This README with setup instructions
-- [ ] `/docs/ARCHITECTURE.md` — all 4 agent architectures (1–2 pages)
-- [ ] `/docs/IMPACT_MODEL.md` — quantified business impact
-- [ ] 3-minute pitch video (record at H10–H11)
-- [ ] Live demo of all 4 products working
-
----
-
-*Each teammate: go directly to your product's `README.md` for your full guide.*
+You will now have a cohesive, tabbed Bloomberg-style terminal allowing you to seamlessly swap between all 4 AI engines in a single interface!
