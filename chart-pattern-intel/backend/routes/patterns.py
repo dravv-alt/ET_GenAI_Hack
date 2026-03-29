@@ -1,6 +1,6 @@
 """Patterns API: returns detected patterns and S/R levels."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from detectors.orchestrator import run_all
 from config import RANK_CONFIDENCE_WEIGHT, RANK_RECENCY_WEIGHT
@@ -10,9 +10,9 @@ router = APIRouter()
 
 
 @router.get("/patterns/{ticker}")
-def get_patterns(ticker: str) -> dict:
+def get_patterns(ticker: str, period: str = Query("1y")) -> dict:
 	try:
-		df = get_ohlcv_with_indicators(ticker, period="6mo")
+		df = get_ohlcv_with_indicators(ticker, period=period)
 	except ValueError as exc:
 		raise HTTPException(status_code=404, detail=str(exc)) from exc
 

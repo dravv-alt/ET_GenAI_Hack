@@ -4,3 +4,4 @@ uvicorn
 yfinance
 pandas
 python-dotenv
+pydantic
