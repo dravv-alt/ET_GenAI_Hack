@@ -1,4 +1,4 @@
-<![CDATA[<div align="center">
+<div align="center">
 
 # 🇮🇳 AI for the Indian Investor
 
@@ -427,4 +427,4 @@ ET_GenAI_Hack/
 *Built in 12 hours at ET AI Hackathon 2026*
 
 </div>
-]]>
+</div>
