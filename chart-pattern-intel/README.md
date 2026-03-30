@@ -28,9 +28,9 @@ Stock pattern analyst for multi-market tickers with detection, backtesting, and 
 - Pattern cards (entry/stop/target, confidence, rank) and key levels panel.
 - Score panel (weighted signal score with confidence/recency/backtest win rate).
 - Backtest toggle with compact sparkline and stats panel.
-- Explanation panel using pattern description + backtest note.
+- Explanation panel with manual LLM generation + fallback explanation.
 - Period selector (6M/1Y/2Y/5Y) for chart + patterns.
-- Auto-refresh toggle (60s) for live updates.
+- Auto-refresh toggle (60s) for chart + pattern refresh (LLM is manual to save credits).
 - Market scan button with ranked results list.
 
 ## Market ticker lists
@@ -88,10 +88,14 @@ Open the Vite URL shown in the terminal (default: http://localhost:5173).
 - GET /paper/ledger
 - GET /paper/summary
 
-## LLM explanations (Gemini)
+## LLM explanations (Groq primary)
 
-Set GEMINI_API_KEY in chart-pattern-intel/.env to enable LLM explanations.
-If the key is missing or Gemini fails, the backend falls back to a rule-based explanation.
+Set GROQ_API_KEY in chart-pattern-intel/.env to enable LLM explanations.
+GROQ_MODEL is optional (default: llama-3.3-70b-versatile).
+If Groq is missing/fails, Gemini is used as fallback when GEMINI_API_KEY is present.
+If both are missing, the backend uses a rule-based explanation.
+
+LLM calls are rate-limited (cached ~45s per pattern/backtest snapshot) and only triggered when the user clicks Generate.
 
 ## NIFTY 50 auto-update (optional)
 
