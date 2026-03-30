@@ -91,6 +91,17 @@ html, body, #root {
 	border-color: var(--green);
 }
 
+.topbar-select {
+	background: #151515;
+	color: var(--text-header);
+	border: 1px solid #333;
+	font-family: var(--mono);
+	font-size: 10px;
+	letter-spacing: 0.08em;
+	padding: 3px 6px;
+	height: 28px;
+}
+
 .status-pill {
 	display: flex;
 	align-items: center;
@@ -121,9 +132,32 @@ html, body, #root {
 	border-right: 1px solid var(--border);
 	background: var(--bg-white);
 	overflow-y: auto;
+	overflow-x: hidden;
 }
 
-.panel-right { border-right: none; border-left: 1px solid var(--border); }
+.panel-right {
+	border-right: 1px solid var(--border);
+	border-left: 1px solid var(--border);
+}
+
+.panel-right .card {
+	min-width: 0;
+}
+
+.panel-right .score-row {
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+}
+
+.panel-right .score-breakdown {
+	grid-template-columns: 1fr;
+	gap: 10px;
+}
+
+.panel-right .score-label {
+	white-space: normal;
+}
 
 .section-cap {
 	padding: 6px 12px;
@@ -165,6 +199,46 @@ html, body, #root {
 	font-family: var(--mono);
 	font-size: 10px;
 	color: var(--red);
+}
+
+.signal-breakdown {
+	display: grid;
+	gap: 6px;
+}
+
+.signal-row {
+	display: grid;
+	gap: 6px;
+	font-family: var(--mono);
+	font-size: 10px;
+}
+
+.signal-label {
+	color: var(--text-muted);
+	letter-spacing: 0.08em;
+}
+
+.signal-value {
+	color: var(--text-primary);
+	font-weight: 500;
+	text-transform: uppercase;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.signal-score {
+	color: var(--amber);
+	text-align: left;
+}
+
+.signal-total {
+	margin-top: 4px;
+	padding-top: 6px;
+	border-top: 1px solid var(--border);
+}
+
+.signal-stack {
+	grid-template-columns: 1fr;
 }
 
 .scan-results {

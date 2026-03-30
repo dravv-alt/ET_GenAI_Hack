@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 
-export default function TickerSearch({ value, tickers, onSelect }) {
+export default function TickerSearch({ value, tickers, onSelect, marketSuffix, aliases, placeholder }) {
   const [query, setQuery] = useState(value || '');
   const [show, setShow] = useState(false);
 
-  const aliases = useMemo(() => ({
-    INF: 'INFY',
-  }), []);
+  const resolvedAliases = useMemo(() => aliases || {}, [aliases]);
 
   useEffect(() => {
     setQuery(value || '');
@@ -21,10 +19,13 @@ export default function TickerSearch({ value, tickers, onSelect }) {
   function normalizeSymbol(input) {
     const trimmed = (input || '').trim().toUpperCase();
     if (!trimmed) return '';
-    const withoutSuffix = trimmed.endsWith('.NS') ? trimmed.slice(0, -3) : trimmed;
-    if (aliases[withoutSuffix]) return aliases[withoutSuffix];
-    if (tickers.some((item) => item.symbol === withoutSuffix)) return withoutSuffix;
-    return withoutSuffix;
+    let normalized = trimmed;
+    if (marketSuffix && normalized.endsWith(marketSuffix)) {
+      normalized = normalized.slice(0, -marketSuffix.length);
+    }
+    if (resolvedAliases[normalized]) return resolvedAliases[normalized];
+    if (tickers.some((item) => item.symbol === normalized)) return normalized;
+    return normalized;
   }
 
   function submit(symbol) {
@@ -61,7 +62,7 @@ export default function TickerSearch({ value, tickers, onSelect }) {
             fontFamily: 'var(--mono)',
             caretColor: 'var(--green)',
           }}
-          placeholder="RELIANCE"
+          placeholder={placeholder || 'RELIANCE'}
         />
         <button
           onClick={() => submit()}

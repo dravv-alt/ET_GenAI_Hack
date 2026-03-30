@@ -1,4 +1,4 @@
-export const TICKERS = [
+const NIFTY50 = [
   { symbol: 'ADANIENT', name: 'Adani Enterprises Ltd' },
   { symbol: 'ADANIPORTS', name: 'Adani Ports and Special Economic Zone Ltd' },
   { symbol: 'APOLLOHOSP', name: 'Apollo Hospitals Enterprise Ltd' },
@@ -50,3 +50,152 @@ export const TICKERS = [
   { symbol: 'UPL', name: 'UPL Ltd' },
   { symbol: 'WIPRO', name: 'Wipro Ltd' }
 ];
+
+export const DEFAULT_MARKET = 'NSE';
+
+export const MARKETS = {
+  NSE: {
+    label: 'NSE',
+    description: 'India - NSE',
+    suffix: '.NS',
+    currency: 'INR',
+    locale: 'en-IN',
+    timeZone: 'Asia/Kolkata',
+    tickers: NIFTY50,
+    defaultTicker: 'RELIANCE',
+  },
+  BSE: {
+    label: 'BSE',
+    description: 'India - BSE',
+    suffix: '.BO',
+    currency: 'INR',
+    locale: 'en-IN',
+    timeZone: 'Asia/Kolkata',
+    tickers: [
+      { symbol: 'RELIANCE', name: 'Reliance Industries Ltd' },
+      { symbol: 'TCS', name: 'Tata Consultancy Services Ltd' },
+      { symbol: 'HDFCBANK', name: 'HDFC Bank Ltd' },
+      { symbol: 'INFY', name: 'Infosys Ltd' },
+      { symbol: 'ICICIBANK', name: 'ICICI Bank Ltd' },
+      { symbol: 'HINDUNILVR', name: 'Hindustan Unilever Ltd' },
+      { symbol: 'SBIN', name: 'State Bank of India' },
+      { symbol: 'ITC', name: 'ITC Ltd' },
+    ],
+    defaultTicker: 'RELIANCE',
+  },
+  NIFTY50: {
+    label: 'NIFTY 50',
+    description: 'India - NIFTY 50',
+    suffix: '.NS',
+    currency: 'INR',
+    locale: 'en-IN',
+    timeZone: 'Asia/Kolkata',
+    tickers: NIFTY50,
+    defaultTicker: 'RELIANCE',
+  },
+  NASDAQ: {
+    label: 'NASDAQ',
+    description: 'US - NASDAQ',
+    currency: 'USD',
+    locale: 'en-US',
+    timeZone: 'America/New_York',
+    tickers: [
+      { symbol: 'AAPL', name: 'Apple Inc' },
+      { symbol: 'MSFT', name: 'Microsoft Corp' },
+      { symbol: 'AMZN', name: 'Amazon.com Inc' },
+      { symbol: 'NVDA', name: 'NVIDIA Corp' },
+      { symbol: 'TSLA', name: 'Tesla Inc' },
+      { symbol: 'META', name: 'Meta Platforms Inc' },
+      { symbol: 'GOOGL', name: 'Alphabet Inc (Class A)' },
+      { symbol: 'NFLX', name: 'Netflix Inc' },
+    ],
+    defaultTicker: 'AAPL',
+  },
+  NYSE: {
+    label: 'NYSE',
+    description: 'US - NYSE',
+    currency: 'USD',
+    locale: 'en-US',
+    timeZone: 'America/New_York',
+    tickers: [
+      { symbol: 'JPM', name: 'JPMorgan Chase & Co' },
+      { symbol: 'JNJ', name: 'Johnson & Johnson' },
+      { symbol: 'V', name: 'Visa Inc' },
+      { symbol: 'WMT', name: 'Walmart Inc' },
+      { symbol: 'KO', name: 'Coca-Cola Co' },
+      { symbol: 'DIS', name: 'Walt Disney Co' },
+      { symbol: 'XOM', name: 'Exxon Mobil Corp' },
+      { symbol: 'BA', name: 'Boeing Co' },
+    ],
+    defaultTicker: 'JPM',
+  },
+  SP500: {
+    label: 'S&P 500',
+    description: 'US - Index',
+    currency: 'USD',
+    locale: 'en-US',
+    timeZone: 'America/New_York',
+    tickers: [
+      { symbol: '^GSPC', name: 'S&P 500 Index' },
+      { symbol: 'SPY', name: 'SPDR S&P 500 ETF' },
+      { symbol: 'AAPL', name: 'Apple Inc' },
+      { symbol: 'MSFT', name: 'Microsoft Corp' },
+      { symbol: 'AMZN', name: 'Amazon.com Inc' },
+      { symbol: 'NVDA', name: 'NVIDIA Corp' },
+      { symbol: 'META', name: 'Meta Platforms Inc' },
+    ],
+    defaultTicker: 'SPY',
+  },
+  DAX: {
+    label: 'DAX',
+    description: 'Germany - DAX',
+    suffix: '.DE',
+    currency: 'EUR',
+    locale: 'de-DE',
+    timeZone: 'Europe/Berlin',
+    tickers: [
+      { symbol: 'SAP', name: 'SAP SE' },
+      { symbol: 'SIE', name: 'Siemens AG' },
+      { symbol: 'ALV', name: 'Allianz SE' },
+      { symbol: 'DTE', name: 'Deutsche Telekom AG' },
+      { symbol: 'ADS', name: 'Adidas AG' },
+    ],
+    defaultTicker: 'SAP',
+  },
+  FTSE: {
+    label: 'FTSE 100',
+    description: 'UK - FTSE 100',
+    suffix: '.L',
+    currency: 'GBP',
+    locale: 'en-GB',
+    timeZone: 'Europe/London',
+    tickers: [
+      { symbol: 'HSBA', name: 'HSBC Holdings PLC' },
+      { symbol: 'AZN', name: 'AstraZeneca PLC' },
+      { symbol: 'VOD', name: 'Vodafone Group PLC' },
+      { symbol: 'BP', name: 'BP PLC' },
+      { symbol: 'GSK', name: 'GSK PLC' },
+      { symbol: 'ULVR', name: 'Unilever PLC' },
+    ],
+    defaultTicker: 'HSBA',
+  },
+  CRYPTO: {
+    label: 'Crypto',
+    description: 'Crypto - USD pairs',
+    currency: 'USD',
+    locale: 'en-US',
+    timeZone: 'UTC',
+    tickers: [
+      { symbol: 'BTC-USD', name: 'Bitcoin' },
+      { symbol: 'ETH-USD', name: 'Ethereum' },
+      { symbol: 'SOL-USD', name: 'Solana' },
+      { symbol: 'XRP-USD', name: 'XRP' },
+      { symbol: 'ADA-USD', name: 'Cardano' },
+    ],
+    defaultTicker: 'BTC-USD',
+  },
+};
+
+export function resolveMarket(market) {
+  return MARKETS[market] || MARKETS[DEFAULT_MARKET];
+}

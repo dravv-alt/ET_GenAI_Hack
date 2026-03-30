@@ -7,17 +7,18 @@ import ExplanationPanel from './components/ExplanationPanel.jsx';
 import LevelMarkers from './components/LevelMarkers.jsx';
 import PatternOverlay from './components/PatternOverlay.jsx';
 import ScorePanel from './components/ScorePanel.jsx';
-import { fetchBacktest, fetchChart, fetchPatterns, fetchScan } from './lib/api.js';
-import { TICKERS } from './lib/tickers.js';
-import { fmtDate, fmtPct, fmtPrice, fmtTime } from './lib/formatters.js';
-
-const DEFAULT_TICKER = 'RELIANCE';
+import SignalBreakdown from './components/SignalBreakdown.jsx';
+import { fetchBacktest, fetchChart, fetchExplain, fetchPatterns, fetchScan } from './lib/api.js';
+import { DEFAULT_MARKET, MARKETS, resolveMarket } from './lib/tickers.js';
+import { fmtDate, fmtPct, fmtPrice, fmtTime, fmtTimeZoneLabel } from './lib/formatters.js';
 
 export default function App() {
-  const [ticker, setTicker] = useState(DEFAULT_TICKER);
+  const [market, setMarket] = useState(DEFAULT_MARKET);
+  const [ticker, setTicker] = useState('');
   const [chart, setChart] = useState(null);
   const [patterns, setPatterns] = useState([]);
   const [levels, setLevels] = useState([]);
+  const [ensemble, setEnsemble] = useState(null);
   const [selected, setSelected] = useState(null);
   const [backtest, setBacktest] = useState(null);
   const [status, setStatus] = useState('idle');
@@ -26,17 +27,46 @@ export default function App() {
   const [showBacktest, setShowBacktest] = useState(false);
   const [period, setPeriod] = useState('1y');
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [mtfConfirm, setMtfConfirm] = useState(false);
   const [scanStatus, setScanStatus] = useState('idle');
   const [scanResults, setScanResults] = useState([]);
   const [scanError, setScanError] = useState('');
   const [refreshTick, setRefreshTick] = useState(0);
+  const [llmExplanation, setLlmExplanation] = useState('');
+  const [llmSource, setLlmSource] = useState('');
+  const [llmStatus, setLlmStatus] = useState('idle');
 
-  const tickers = useMemo(() => TICKERS, []);
+  const currentMarket = useMemo(() => resolveMarket(market), [market]);
+  const tickers = useMemo(() => currentMarket.tickers || [], [currentMarket]);
+  const defaultTicker = currentMarket.defaultTicker || tickers[0]?.symbol || '';
+  const currency = currentMarket.currency || 'INR';
+  const locale = currentMarket.locale || 'en-IN';
+  const timeZone = currentMarket.timeZone || 'Asia/Kolkata';
+  const timeZoneLabel = useMemo(() => fmtTimeZoneLabel(timeZone, locale), [timeZone, locale]);
+  const marketAliases = useMemo(() => {
+    if (['NSE', 'NIFTY50', 'BSE'].includes(market)) {
+      return { INF: 'INFY' };
+    }
+    return {};
+  }, [market]);
 
   useEffect(() => {
-    const id = setInterval(() => setTime(fmtTime()), 1000);
+    setTicker((prev) => {
+      if (!defaultTicker) return prev;
+      if (!prev) return defaultTicker;
+      if (tickers.some((item) => item.symbol === prev)) return prev;
+      return defaultTicker;
+    });
+    setScanResults([]);
+    setScanStatus('idle');
+    setScanError('');
+  }, [currentMarket, defaultTicker, tickers]);
+
+  useEffect(() => {
+    setTime(fmtTime(timeZone, locale));
+    const id = setInterval(() => setTime(fmtTime(timeZone, locale)), 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [timeZone, locale]);
 
   useEffect(() => {
     if (!autoRefresh) return;
@@ -53,13 +83,14 @@ export default function App() {
       setError('');
       try {
         const [chartResp, patternResp] = await Promise.all([
-          fetchChart(ticker, period),
-          fetchPatterns(ticker, period),
+          fetchChart(ticker, period, market),
+          fetchPatterns(ticker, period, market, mtfConfirm),
         ]);
         if (!active) return;
         setChart(chartResp);
         setPatterns(patternResp.patterns || []);
         setLevels(patternResp.levels || []);
+        setEnsemble(patternResp.ensemble || null);
         setSelected(patternResp.patterns?.[0] || null);
         setStatus('ready');
       } catch (err) {
@@ -72,14 +103,14 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [ticker, period, refreshTick]);
+  }, [ticker, period, refreshTick, market, mtfConfirm]);
 
   const runScan = async () => {
     setScanStatus('loading');
     setScanError('');
     try {
       const tickersList = tickers.map((item) => item.symbol);
-      const resp = await fetchScan(tickersList, period, 25);
+      const resp = await fetchScan(tickersList, period, 25, market, mtfConfirm);
       setScanResults(resp.results || []);
       setScanStatus('ready');
     } catch (err) {
@@ -96,7 +127,7 @@ export default function App() {
         return;
       }
       try {
-        const resp = await fetchBacktest(ticker, selected.pattern_type);
+        const resp = await fetchBacktest(ticker, selected.pattern_type, market);
         if (!active) return;
         setBacktest(resp);
         setShowBacktest(false);
@@ -113,14 +144,46 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [ticker, selected]);
+  }, [ticker, selected, market]);
 
-  const explanation = useMemo(() => {
+  const formatSymbol = (symbol) => {
+    if (!symbol) return '';
+    const suffix = currentMarket?.suffix;
+    if (suffix && symbol.endsWith(suffix)) {
+      return symbol.slice(0, -suffix.length);
+    }
+    return symbol;
+  };
+
+  const formatPrice = (value) => fmtPrice(value, currency, locale);
+
+  const fallbackExplanation = useMemo(() => {
     if (!selected) return '';
     const detail = selected.plain_english || selected.description || '';
     const backtestNote = backtest?.note ? ` ${backtest.note}` : '';
     return `${detail}${backtestNote}`.trim();
   }, [selected, backtest]);
+
+  useEffect(() => {
+    setLlmExplanation('');
+    setLlmSource('');
+    setLlmStatus('idle');
+  }, [selected, backtest]);
+
+  const requestExplanation = async () => {
+    if (!selected) return;
+    setLlmStatus('loading');
+    try {
+      const resp = await fetchExplain(selected, backtest);
+      setLlmExplanation(resp.explanation || '');
+      setLlmSource(resp.source || '');
+      setLlmStatus('ready');
+    } catch {
+      setLlmExplanation('');
+      setLlmSource('');
+      setLlmStatus('error');
+    }
+  };
 
   const marketSnapshot = useMemo(() => {
     const rows = chart?.ohlcv || [];
@@ -153,10 +216,24 @@ export default function App() {
     <div className="app-root">
       <div className="topbar">
         <div className="topbar-title">CHART PATTERN INTEL</div>
+        <select
+          className="topbar-select"
+          value={market}
+          onChange={(event) => setMarket(event.target.value)}
+        >
+          {Object.entries(MARKETS).map(([key, info]) => (
+            <option key={key} value={key}>
+              {info.label}
+            </option>
+          ))}
+        </select>
         <TickerSearch
           value={ticker}
           tickers={tickers}
           onSelect={setTicker}
+          marketSuffix={currentMarket.suffix}
+          aliases={marketAliases}
+          placeholder={defaultTicker || 'TICKER'}
         />
         <button
           type="button"
@@ -165,9 +242,16 @@ export default function App() {
         >
           AUTO REFRESH {autoRefresh ? 'ON' : 'OFF'}
         </button>
+        <button
+          type="button"
+          className={`topbar-button ${mtfConfirm ? 'active' : ''}`}
+          onClick={() => setMtfConfirm((prev) => !prev)}
+        >
+          MTF {mtfConfirm ? 'ON' : 'OFF'}
+        </button>
         <div className="status-pill">
           <span className="status-dot" />
-          NSE LIVE
+          {currentMarket.label} {timeZoneLabel}
         </div>
         <div className="topbar-clock">{time}</div>
       </div>
@@ -187,7 +271,7 @@ export default function App() {
               onClick={runScan}
               disabled={scanStatus === 'loading'}
             >
-              {scanStatus === 'loading' ? 'SCANNING...' : 'SCAN NIFTY 50'}
+              {scanStatus === 'loading' ? 'SCANNING...' : `SCAN ${currentMarket.label}`}
             </button>
             {scanStatus === 'error' && <span className="panel-error">{scanError}</span>}
           </div>
@@ -201,6 +285,7 @@ export default function App() {
                 pattern={pattern}
                 active={selected?.pattern_type === pattern.pattern_type}
                 onSelect={setSelected}
+                formatPrice={formatPrice}
               />
             ))}
           </div>
@@ -215,9 +300,9 @@ export default function App() {
                 key={`${item.ticker}-${item.pattern?.pattern_type}`}
                 type="button"
                 className="scan-item"
-                onClick={() => setTicker(item.ticker.replace('.NS', ''))}
+                onClick={() => setTicker(formatSymbol(item.ticker))}
               >
-                <div className="scan-symbol">{item.ticker.replace('.NS', '')}</div>
+                <div className="scan-symbol">{formatSymbol(item.ticker)}</div>
                 <div className="scan-pattern">{item.pattern?.pattern_type?.replace('_', ' ')}</div>
                 <div className="scan-score">{item.rank_score != null ? item.rank_score.toFixed(2) : '—'}</div>
               </button>
@@ -239,7 +324,7 @@ export default function App() {
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
               <div className="chart-price">
-                {marketSnapshot ? fmtPrice(marketSnapshot.last.close) : '-'}
+                {marketSnapshot ? formatPrice(marketSnapshot.last.close) : '-'}
               </div>
               <div className={`chart-change ${marketSnapshot?.change >= 0 ? 'up' : 'down'}`}>
                 {marketSnapshot ? fmtPct(marketSnapshot.change) : '-'}
@@ -269,7 +354,12 @@ export default function App() {
               </div>
             )}
             {chart && (
-              <CandlestickChart ohlcv={chart.ohlcv} levels={levels} patterns={patterns} />
+              <CandlestickChart
+                ohlcv={chart.ohlcv}
+                levels={levels}
+                patterns={patterns}
+                formatPrice={formatPrice}
+              />
             )}
             {patterns.length > 0 && (
               <div className="pattern-strip">
@@ -309,8 +399,14 @@ export default function App() {
             </div>
             {showBacktest && <BacktestStats backtest={backtest} />}
             <PatternOverlay patterns={patterns} />
-            <LevelMarkers levels={levels} />
-            <ExplanationPanel explanation={explanation} />
+            <LevelMarkers levels={levels} formatPrice={formatPrice} />
+            <ExplanationPanel
+              explanation={llmExplanation || fallbackExplanation}
+              source={llmSource}
+              onExplain={requestExplanation}
+              loading={llmStatus === 'loading'}
+              disabled={!selected}
+            />
           </div>
         </main>
 
@@ -323,6 +419,7 @@ export default function App() {
           </div>
           <div style={{ padding: 12, display: 'grid', gap: 12 }}>
             <ScorePanel patterns={patterns} selected={selected} backtest={backtest} />
+            <SignalBreakdown ensemble={ensemble} />
           </div>
         </aside>
       </div>

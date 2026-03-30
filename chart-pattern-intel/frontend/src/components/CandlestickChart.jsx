@@ -3,7 +3,7 @@ import { createChart, CrosshairMode } from 'lightweight-charts';
 
 const BEARISH_TYPES = ['double_top', 'head_shoulders'];
 
-export default function CandlestickChart({ ohlcv = [], levels = [], patterns = [], height = 240 }) {
+export default function CandlestickChart({ ohlcv = [], levels = [], patterns = [], height = 240, formatPrice }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const seriesRef = useRef(null);
@@ -136,10 +136,10 @@ export default function CandlestickChart({ ohlcv = [], levels = [], patterns = [
             {ohlcv.slice(-6).map((row) => (
               <tr key={row.date}>
                 <td>{row.date}</td>
-                <td>{row.open.toFixed(2)}</td>
-                <td>{row.high.toFixed(2)}</td>
-                <td>{row.low.toFixed(2)}</td>
-                <td>{row.close.toFixed(2)}</td>
+                <td>{formatPrice ? formatPrice(row.open) : row.open.toFixed(2)}</td>
+                <td>{formatPrice ? formatPrice(row.high) : row.high.toFixed(2)}</td>
+                <td>{formatPrice ? formatPrice(row.low) : row.low.toFixed(2)}</td>
+                <td>{formatPrice ? formatPrice(row.close) : row.close.toFixed(2)}</td>
                 <td>{Math.round(row.volume)}</td>
               </tr>
             ))}

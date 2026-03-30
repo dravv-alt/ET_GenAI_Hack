@@ -1,9 +1,20 @@
-export function fmtPrice(value) {
+export function fmtPrice(value, currency = 'INR', locale = 'en-IN') {
   if (value == null || Number.isNaN(Number(value))) return '-';
-  return `INR ${Number(value).toLocaleString('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  const amount = Number(value);
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      currencyDisplay: 'code',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount.toLocaleString(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }
 }
 
 export function fmtPct(value) {
@@ -18,11 +29,36 @@ export function fmtDate(value) {
   return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
 }
 
-export function fmtTime() {
-  return new Date().toLocaleTimeString('en-IN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  }) + ' IST';
+export function fmtTime(timeZone = 'Asia/Kolkata', locale = 'en-IN') {
+  const date = new Date();
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      timeZone,
+      timeZoneName: 'short',
+    }).format(date);
+  } catch {
+    return date.toLocaleTimeString(locale, {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
+  }
+}
+
+export function fmtTimeZoneLabel(timeZone = 'Asia/Kolkata', locale = 'en-IN') {
+  try {
+    const parts = new Intl.DateTimeFormat(locale, {
+      timeZone,
+      timeZoneName: 'short',
+    }).formatToParts(new Date());
+    const tz = parts.find((part) => part.type === 'timeZoneName');
+    return tz?.value || timeZone;
+  } catch {
+    return timeZone;
+  }
 }

@@ -1,5 +1,5 @@
 // Displays one detected pattern with entry/SL/target levels
-export default function PatternCard({ pattern, active, onSelect }) {
+export default function PatternCard({ pattern, active, onSelect, formatPrice }) {
   const bearishTypes = ['double_top', 'head_shoulders'];
   const isBearish = bearishTypes.includes(pattern.pattern_type);
   const direction = isBearish ? 'BEARISH' : 'BULLISH';
@@ -28,15 +28,15 @@ export default function PatternCard({ pattern, active, onSelect }) {
         </div>
         <div className="stat-row">
           <span className="label">ENTRY</span>
-          <span className="value">{pattern.entry_price.toFixed(2)}</span>
+          <span className="value">{formatPrice ? formatPrice(pattern.entry_price) : pattern.entry_price.toFixed(2)}</span>
         </div>
         <div className="stat-row">
           <span className="label">STOP</span>
-          <span className="value">{pattern.stop_loss.toFixed(2)}</span>
+          <span className="value">{formatPrice ? formatPrice(pattern.stop_loss) : pattern.stop_loss.toFixed(2)}</span>
         </div>
         <div className="stat-row">
           <span className="label">TARGET</span>
-          <span className="value">{pattern.target_price.toFixed(2)}</span>
+          <span className="value">{formatPrice ? formatPrice(pattern.target_price) : pattern.target_price.toFixed(2)}</span>
         </div>
         {rankScore !== null && (
           <div className="stat-row">

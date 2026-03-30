@@ -1,7 +1,7 @@
 
 
 // Displays support/resistance level badges
-export default function LevelMarkers({ levels = [] }) {
+export default function LevelMarkers({ levels = [], formatPrice }) {
   if (!levels.length) {
     return (
       <div className="card">
@@ -21,7 +21,7 @@ export default function LevelMarkers({ levels = [] }) {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
         {levels.map((level, idx) => (
           <span key={`${level.level_type}-${idx}`} className="pill">
-            {level.level_type.toUpperCase()} {level.price.toFixed(2)}
+            {level.level_type.toUpperCase()} {formatPrice ? formatPrice(level.price) : level.price.toFixed(2)}
           </span>
         ))}
       </div>
