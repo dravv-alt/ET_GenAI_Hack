@@ -13,6 +13,7 @@ from config import (
 	BACKTEST_MIN_SAMPLES,
 	BACKTEST_MIN_SAMPLES_WARNING,
 	BACKTEST_PERIOD,
+	BACKTEST_RISK_FREE_RATE,
 	BACKTEST_SUCCESS_MODE,
 	BREAKOUT_CONFIRM_PCT,
 	BREAKOUT_LOOKBACK_DAYS,
@@ -316,23 +317,44 @@ def evaluate_occurrence(
 		return None
 
 	success = None
-	for _, row in segment.iterrows():
+	exit_price = float(segment.iloc[-1]["close"])
+	exit_idx = end_idx
+	exit_reason = "time"
+	bars_to_target = None
+	bars_to_stop = None
+	for offset, row in enumerate(segment.itertuples(index=False), start=0):
 		if pattern_type in {"double_top", "head_shoulders"}:
-			if row["low"] <= target_price:
+			if row.low <= target_price:
 				success = True
+				exit_price = target_price
+				exit_idx = entry_idx + offset
+				exit_reason = "target"
+				bars_to_target = offset + 1
 				break
-			if row["high"] >= stop_loss:
+			if row.high >= stop_loss:
 				success = False
+				exit_price = stop_loss
+				exit_idx = entry_idx + offset
+				exit_reason = "stop"
+				bars_to_stop = offset + 1
 				break
 		else:
-			if row["high"] >= target_price:
+			if row.high >= target_price:
 				success = True
+				exit_price = target_price
+				exit_idx = entry_idx + offset
+				exit_reason = "target"
+				bars_to_target = offset + 1
 				break
-			if row["low"] <= stop_loss:
+			if row.low <= stop_loss:
 				success = False
+				exit_price = stop_loss
+				exit_idx = entry_idx + offset
+				exit_reason = "stop"
+				bars_to_stop = offset + 1
 				break
 
-	exit_price = float(segment.iloc[-1]["close"])
+	bars_held = (exit_idx - entry_idx) + 1
 	raw_return = (exit_price - entry_price) / entry_price * 100
 	directional_return = raw_return * _directional_multiplier(pattern_type)
 	if success is None:
@@ -341,12 +363,16 @@ def evaluate_occurrence(
 	return {
 		"signal_idx": float(signal_idx),
 		"entry_idx": float(entry_idx),
-		"exit_idx": float(end_idx),
+		"exit_idx": float(exit_idx),
 		"entry_price": entry_price,
 		"exit_price": exit_price,
 		"return_pct": raw_return,
 		"directional_return_pct": directional_return,
 		"success": 1.0 if success else 0.0,
+		"exit_reason": exit_reason,
+		"bars_held": float(bars_held),
+		"bars_to_target": float(bars_to_target) if bars_to_target is not None else None,
+		"bars_to_stop": float(bars_to_stop) if bars_to_stop is not None else None,
 	}
 
 
@@ -393,7 +419,19 @@ def _run_backtest(
 		return _build_insufficient_result(ticker, pattern_type, sample_count, holding_period_days), evaluations
 
 	outcomes = [e["directional_return_pct"] for e in evaluations]
-	stats = compute_backtest_stats(outcomes)
+	date_series = pd.to_datetime(df_5yr["date"], errors="coerce")
+	if date_series.notna().any():
+		date_series = date_series.dropna()
+		total_years = max((date_series.iloc[-1] - date_series.iloc[0]).days / 365.0, 0.0)
+	else:
+		total_years = None
+	stats = compute_backtest_stats(
+		outcomes,
+		evaluations=evaluations,
+		total_bars=len(df_5yr),
+		total_years=total_years,
+		risk_free_rate=BACKTEST_RISK_FREE_RATE,
+	)
 
 	note = f"Based on {sample_count} historical occurrences over {BACKTEST_PERIOD}"
 	if sample_count < BACKTEST_MIN_SAMPLES:
@@ -408,6 +446,16 @@ def _run_backtest(
 		avg_loss_pct=stats["avg_loss_pct"],
 		rr_ratio=stats["rr_ratio"],
 		median_return_pct=stats["median_return_pct"],
+		profit_factor=stats["profit_factor"],
+		expectancy=stats["expectancy"],
+		sharpe_ratio=stats["sharpe_ratio"],
+		sortino_ratio=stats["sortino_ratio"],
+		max_drawdown_pct=stats["max_drawdown_pct"],
+		calmar_ratio=stats["calmar_ratio"],
+		exposure_pct=stats["exposure_pct"],
+		avg_time_in_trade_bars=stats["avg_time_in_trade_bars"],
+		avg_bars_to_target=stats["avg_bars_to_target"],
+		avg_bars_to_stop=stats["avg_bars_to_stop"],
 		holding_period_days=holding_period_days,
 		entry_mode=BACKTEST_ENTRY_MODE,
 		success_mode=BACKTEST_SUCCESS_MODE,

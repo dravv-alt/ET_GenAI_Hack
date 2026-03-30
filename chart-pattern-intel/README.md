@@ -1,11 +1,11 @@
 # Chart Pattern Intelligence
 
-Stock pattern analyst for NSE tickers with detection, backtesting, and a Bloomberg-style UI. Users search a ticker, see OHLCV with technical overlays, get ranked pattern signals, and review historical backtest stats.
+Stock pattern analyst for multi-market tickers with detection, backtesting, and a Bloomberg-style UI. Users search a ticker, see OHLCV with technical overlays, get ranked pattern signals, and review historical backtest stats.
 
 ## What is implemented
 
 ### Backend (FastAPI, Python)
-- Market data ingestion via yfinance with NSE ticker normalization (.NS suffix).
+- Market data ingestion via yfinance with market-aware ticker normalization (NSE/BSE/DAX/FTSE suffixes, crypto pairs, indices).
 - Technical indicators: RSI, MACD, SMA 20/50/200, Bollinger Bands, Volume SMA 20.
 - Pattern detectors:
   - Support/Resistance (pivot levels, merged + ranked by touches)
@@ -15,11 +15,15 @@ Stock pattern analyst for NSE tickers with detection, backtesting, and a Bloombe
   - Candlestick (hammer, bullish engulfing)
 - Pattern ranking: confidence + recency score.
 - Backtesting engine with occurrence finders and directional handling for bearish patterns.
-- Robust backtest stats (win rate, avg gain/loss, RR, median) + low-sample warnings.
+- Expanded backtest stats (drawdown, Calmar, Sharpe/Sortino, profit factor, expectancy, exposure, time-in-trade).
+- Multi-timeframe confirmation (1D/4H/1H) toggle.
+- Ensemble signal scoring with feature breakdown.
+- Paper-trading portfolio with ledger + PnL summary.
+- Background precompute for scans/backtests (in-memory cache).
 
 ### Frontend (React + Vite)
 - Bloomberg-style monochrome design system and layout.
-- Ticker search with NSE list + aliases (INF -> INFY) and dropdown selection.
+- Market dropdown with per-market ticker lists, currency formatting, and aliases (INF -> INFY for India).
 - Candlestick chart via lightweight-charts with support/resistance price lines and pattern markers.
 - Pattern cards (entry/stop/target, confidence, rank) and key levels panel.
 - Score panel (weighted signal score with confidence/recency/backtest win rate).
@@ -27,11 +31,11 @@ Stock pattern analyst for NSE tickers with detection, backtesting, and a Bloombe
 - Explanation panel using pattern description + backtest note.
 - Period selector (6M/1Y/2Y/5Y) for chart + patterns.
 - Auto-refresh toggle (60s) for live updates.
-- NIFTY 50 scan button with ranked results list.
+- Market scan button with ranked results list.
 
-### NIFTY 50 ticker list
-- Static list stored in frontend.
-- Optional updater script to auto-generate from CSV if a source is available.
+## Market ticker lists
+- Static per-market lists stored in frontend (NSE, BSE, NIFTY 50, NASDAQ, NYSE, S&P 500, DAX, FTSE 100, Crypto).
+- Optional NIFTY 50 updater script to auto-generate from CSV if a source is available.
 
 ## Project structure
 
@@ -46,6 +50,8 @@ Stock pattern analyst for NSE tickers with detection, backtesting, and a Bloombe
 ### Backend
 
 From chart-pattern-intel/backend:
+
+No venv is required.
 
 1) Install deps
 
@@ -72,10 +78,20 @@ Open the Vite URL shown in the terminal (default: http://localhost:5173).
 ## API endpoints
 
 - GET /health
-- GET /chart/{ticker}?period=6mo|1y|2y|5y
-- GET /patterns/{ticker}?period=6mo|1y|2y|5y
-- GET /backtest/{ticker}/{pattern_type}?holding_period=15
-- POST /scan { tickers[], period, limit }
+- GET /chart/{ticker}?period=6mo|1y|2y|5y&market=NSE
+- GET /patterns/{ticker}?period=6mo|1y|2y|5y&market=NSE&mtf=false
+- GET /backtest/{ticker}/{pattern_type}?holding_period=15&market=NSE
+- POST /scan { tickers[], period, limit, market, mtf }
+- POST /explain { pattern, backtest }
+- POST /paper/reset { starting_cash }
+- POST /paper/trade { symbol, market, side, quantity, price?, period? }
+- GET /paper/ledger
+- GET /paper/summary
+
+## LLM explanations (Gemini)
+
+Set GEMINI_API_KEY in chart-pattern-intel/.env to enable LLM explanations.
+If the key is missing or Gemini fails, the backend falls back to a rule-based explanation.
 
 ## NIFTY 50 auto-update (optional)
 
@@ -91,6 +107,7 @@ Script: frontend/scripts/update_nifty50.cjs
 - Pattern detection can return empty lists for some tickers or short windows.
 - Backtest stats are conservative for low sample counts.
 - The updater script depends on a reachable CSV source; provide NIFTY50_SOURCE_URL if needed.
+- Paper trading and precompute caches are in-memory and reset on server restart.
 
 ## Report references
 

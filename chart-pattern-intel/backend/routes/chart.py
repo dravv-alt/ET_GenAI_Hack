@@ -9,9 +9,13 @@ router = APIRouter()
 
 
 @router.get("/chart/{ticker}", response_model=ChartResponse)
-def get_chart(ticker: str, period: str = Query("6mo", pattern="^(6mo|1y|2y|5y)$")) -> ChartResponse:
+def get_chart(
+	ticker: str,
+	period: str = Query("6mo", pattern="^(6mo|1y|2y|5y)$"),
+	market: str = Query("NSE"),
+) -> ChartResponse:
 	try:
-		df = get_ohlcv(ticker, period=period)
+		df = get_ohlcv(ticker, period=period, market=market)
 	except ValueError as exc:
 		raise HTTPException(status_code=404, detail=str(exc)) from exc
 

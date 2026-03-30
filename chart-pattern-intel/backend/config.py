@@ -39,6 +39,8 @@ HEAD_SHOULDERS_TOLERANCE = 0.04
 HEAD_SHOULDERS_NECKLINE_MULTIPLIER = 0.99
 
 BACKTEST_HOLDING_PERIOD_DAYS = 15
+BACKTEST_RISK_FREE_RATE = 0.03
+TRADING_DAYS_PER_YEAR = 252
 
 BACKTEST_PERIOD = "5y"
 BACKTEST_MIN_SAMPLES = 5
@@ -47,6 +49,37 @@ BACKTEST_ENTRY_MODE = "next_open"
 BACKTEST_SUCCESS_MODE = "target_or_positive_return"
 DEFAULT_STOP_LOSS_PCT = 0.03
 DEFAULT_TARGET_PCT = 0.06
+
+MTF_INTERVALS = {
+	"1d": {"period": "1y", "interval": "1d"},
+	"4h": {"period": "120d", "interval": "4h"},
+	"1h": {"period": "60d", "interval": "1h"},
+}
+
+PRECOMPUTE_ENABLED = True
+PRECOMPUTE_INTERVAL_SECONDS = 900
+PRECOMPUTE_UNIVERSE = {
+	"NSE": ["RELIANCE", "TCS", "HDFCBANK", "INFY"],
+	"NASDAQ": ["AAPL", "MSFT", "NVDA", "AMZN"],
+	"NYSE": ["JPM", "JNJ", "V", "WMT"],
+	"SP500": ["SPY", "AAPL", "MSFT", "NVDA"],
+	"DAX": ["SAP", "SIE", "ALV"],
+	"FTSE": ["HSBA", "AZN", "VOD"],
+	"BSE": ["RELIANCE", "TCS", "HDFCBANK", "INFY"],
+	"CRYPTO": ["BTC-USD", "ETH-USD"],
+	"NIFTY50": ["RELIANCE", "TCS", "HDFCBANK", "INFY"],
+}
+PRECOMPUTE_PATTERNS = [
+	"breakout",
+	"macd_crossover",
+	"golden_cross",
+	"rsi_divergence",
+	"hammer",
+	"engulfing",
+	"double_bottom",
+	"double_top",
+	"head_shoulders",
+]
 
 BREAKOUT_LOOKBACK_DAYS = 20
 BREAKOUT_CONFIRM_PCT = 0.005
