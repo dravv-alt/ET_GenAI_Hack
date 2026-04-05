@@ -1,0 +1,61 @@
+# ── Environment & secrets ──
+.env
+.env.*
+*.env
+*.key
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Node ──
+node_modules/
+.vite/
+
+# ── Database ──
+*.db
+*.sqlite
+*.sqlite3
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ──
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Logs ──
+*.log
+
+# ── Excluded project folders ──
+stitch/
+Stitch Design System/
+
+# ── Excluded test/debug scripts ──
+ET_GenAI_Hack/call_explain_test.py
+ET_GenAI_Hack/call_explain_wipro.py
+ET_GenAI_Hack/check_video_status.py
+ET_GenAI_Hack/debug_import_mve.py
+ET_GenAI_Hack/download_video.py
+ET_GenAI_Hack/dump_db_runs.py
+ET_GenAI_Hack/generate_market_video_request.py
+ET_GenAI_Hack/market_video_generate_result.json
+ET_GenAI_Hack/npm_check.bat
+ET_GenAI_Hack/probe_groq_key.py
+
+# ── Videos (exclude all except the two approved) ──
+Videos/*
+!Videos/sovereign_analyst_test.mp4
+!Videos/test_out.mp4
+
+# ── Temp/test frames ──
+Videos/test_frames/
