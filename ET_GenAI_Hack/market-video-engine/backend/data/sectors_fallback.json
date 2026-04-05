@@ -1,0 +1,34 @@
+[
+  {
+    "sector": "Bank",
+    "change_pct": 1.31
+  },
+  {
+    "sector": "IT",
+    "change_pct": 0.92
+  },
+  {
+    "sector": "Auto",
+    "change_pct": 0.64
+  },
+  {
+    "sector": "Energy",
+    "change_pct": 0.37
+  },
+  {
+    "sector": "FMCG",
+    "change_pct": -0.18
+  },
+  {
+    "sector": "Pharma",
+    "change_pct": -0.33
+  },
+  {
+    "sector": "Metal",
+    "change_pct": -0.55
+  },
+  {
+    "sector": "Realty",
+    "change_pct": -0.79
+  }
+]

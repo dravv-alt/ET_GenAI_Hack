@@ -1,0 +1,6 @@
+{
+  "as_of": "latest",
+  "fii_net_cr": 1248.5,
+  "dii_net_cr": 913.2,
+  "note": "Fallback payload used when live institutional flow data is unavailable."
+}

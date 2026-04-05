@@ -1,0 +1,56 @@
+{
+  "gainers": [
+    {
+      "ticker": "RELIANCE",
+      "change_pct": 2.4,
+      "current_price": 2946.3
+    },
+    {
+      "ticker": "ICICIBANK",
+      "change_pct": 1.9,
+      "current_price": 1125.6
+    },
+    {
+      "ticker": "SBIN",
+      "change_pct": 1.5,
+      "current_price": 826.8
+    },
+    {
+      "ticker": "LT",
+      "change_pct": 1.2,
+      "current_price": 3732.4
+    },
+    {
+      "ticker": "TATAMOTORS",
+      "change_pct": 1.0,
+      "current_price": 997.1
+    }
+  ],
+  "losers": [
+    {
+      "ticker": "HINDUNILVR",
+      "change_pct": -1.8,
+      "current_price": 2482.2
+    },
+    {
+      "ticker": "ASIANPAINT",
+      "change_pct": -1.4,
+      "current_price": 2850.9
+    },
+    {
+      "ticker": "WIPRO",
+      "change_pct": -1.1,
+      "current_price": 525.7
+    },
+    {
+      "ticker": "ULTRACEMCO",
+      "change_pct": -0.9,
+      "current_price": 10076.4
+    },
+    {
+      "ticker": "ITC",
+      "change_pct": -0.7,
+      "current_price": 430.3
+    }
+  ]
+}

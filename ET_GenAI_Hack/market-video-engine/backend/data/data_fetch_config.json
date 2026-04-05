@@ -1,0 +1,10 @@
+{
+  "timeout_sec": 8,
+  "retries": 3,
+  "retry_backoff_sec": 0.6,
+  "use_threads": false,
+  "max_tickers": 20,
+  "min_valid_movers": 6,
+  "min_valid_sectors": 4,
+  "exclude_tickers": []
+}
