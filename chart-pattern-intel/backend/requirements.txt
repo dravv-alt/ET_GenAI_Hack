@@ -1,0 +1,9 @@
+# Backend dependencies for Chart Pattern Intelligence
+fastapi
+uvicorn
+yfinance
+pandas
+python-dotenv
+pydantic
+google-generativeai
+requests

@@ -1,0 +1,2 @@
+-- SQLite schema for rendered videos and scripts
+-- TODO: create tables for videos and scripts.

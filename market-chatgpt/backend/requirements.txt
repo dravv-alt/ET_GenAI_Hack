@@ -1,0 +1,7 @@
+# Backend dependencies for Market ChatGPT
+fastapi
+uvicorn
+python-multipart
+yfinance
+pandas
+python-dotenv
