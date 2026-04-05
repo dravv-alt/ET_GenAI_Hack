@@ -1,0 +1,142 @@
+"""Shared configuration values for detectors and data fetching."""
+
+CACHE_TTL_SECONDS = 300
+RATE_LIMIT_DELAY_SECONDS = 0.2
+
+SR_SENSITIVITY = 0.02
+SR_MIN_TOUCHES = 2
+SR_MAX_LEVELS = 8
+
+BREAKOUT_MIN_CLOSE_MULTIPLIER = 1.005
+BREAKOUT_MAX_EXTENSION_MULTIPLIER = 1.03
+BREAKOUT_VOLUME_RATIO = 1.5
+BREAKOUT_CONFIDENCE_BASE = 0.65
+BREAKOUT_CONFIDENCE_SLOPE = 0.08
+
+MACD_CROSS_LOOKBACK = 5
+GOLDEN_CROSS_LOOKBACK = 10
+RSI_DIVERGENCE_RECENT_WINDOW = 20
+RSI_DIVERGENCE_EARLIER_WINDOW = 20
+
+CANDLE_TREND_LOOKBACK = 5
+
+DOUBLE_BOTTOM_WINDOW = 60
+DOUBLE_BOTTOM_MIN_GAP = 10
+DOUBLE_BOTTOM_MAX_GAP = 40
+DOUBLE_BOTTOM_TOLERANCE = 0.03
+DOUBLE_BOTTOM_CONFIRM_MULTIPLIER = 1.01
+
+DOUBLE_TOP_WINDOW = 60
+DOUBLE_TOP_MIN_GAP = 10
+DOUBLE_TOP_MAX_GAP = 40
+DOUBLE_TOP_TOLERANCE = 0.03
+DOUBLE_TOP_CONFIRM_MULTIPLIER = 0.99
+
+HEAD_SHOULDERS_WINDOW = 80
+HEAD_SHOULDERS_MIN_GAP = 5
+HEAD_SHOULDERS_MAX_GAP = 30
+HEAD_SHOULDERS_TOLERANCE = 0.04
+HEAD_SHOULDERS_NECKLINE_MULTIPLIER = 0.99
+
+BACKTEST_HOLDING_PERIOD_DAYS = 15
+BACKTEST_RISK_FREE_RATE = 0.03
+TRADING_DAYS_PER_YEAR = 252
+
+BACKTEST_PERIOD = "5y"
+BACKTEST_MIN_SAMPLES = 5
+BACKTEST_MIN_SAMPLES_WARNING = 3
+BACKTEST_ENTRY_MODE = "next_open"
+BACKTEST_SUCCESS_MODE = "target_or_positive_return"
+DEFAULT_STOP_LOSS_PCT = 0.03
+DEFAULT_TARGET_PCT = 0.06
+
+MTF_INTERVALS = {
+	"1d": {"period": "1y", "interval": "1d"},
+	"4h": {"period": "120d", "interval": "4h"},
+	"1h": {"period": "60d", "interval": "1h"},
+}
+
+PRECOMPUTE_ENABLED = True
+PRECOMPUTE_INTERVAL_SECONDS = 900
+import json
+from pathlib import Path
+
+def _load_nifty50() -> list[str]:
+	try:
+		p = Path(__file__).resolve().parent / "data" / "nifty50.json"
+		if p.exists():
+			with p.open("r", encoding="utf-8") as fp:
+				items = json.load(fp)
+				if isinstance(items, list) and items:
+					return [str(x).upper() for x in items]
+	except Exception:
+		pass
+	return ["RELIANCE", "TCS", "HDFCBANK", "INFY"]
+
+NIFTY50_LIST = _load_nifty50()
+
+PRECOMPUTE_UNIVERSE = {
+	"NSE": ["RELIANCE", "TCS", "HDFCBANK", "INFY"],
+	"NASDAQ": ["AAPL", "MSFT", "NVDA", "AMZN"],
+	"NYSE": ["JPM", "JNJ", "V", "WMT"],
+	"SP500": ["SPY", "AAPL", "MSFT", "NVDA"],
+	"DAX": ["SAP", "SIE", "ALV"],
+	"FTSE": ["HSBA", "AZN", "VOD"],
+	"BSE": ["RELIANCE", "TCS", "HDFCBANK", "INFY"],
+	"CRYPTO": ["BTC-USD", "ETH-USD"],
+	"NIFTY50": NIFTY50_LIST,
+}
+PRECOMPUTE_PATTERNS = [
+	"breakout",
+	"macd_crossover",
+	"golden_cross",
+	"rsi_divergence",
+	"hammer",
+	"engulfing",
+	"double_bottom",
+	"double_top",
+	"head_shoulders",
+]
+
+BREAKOUT_LOOKBACK_DAYS = 20
+BREAKOUT_CONFIRM_PCT = 0.005
+BREAKOUT_MIN_VOLUME_RATIO = 1.5
+BREAKOUT_MAX_EXTENSION_PCT = 0.08
+
+MACD_RECENT_LOOKBACK = 5
+GOLDEN_CROSS_RECENT_LOOKBACK = 5
+RSI_DIVERGENCE_LOOKBACK = 20
+
+HAMMER_LOOKBACK_DOWNTREND = 3
+ENGULFING_LOOKBACK_DOWNTREND = 3
+
+DOUBLE_BOTTOM_PEAK_TOLERANCE_PCT = 0.03
+DOUBLE_TOP_TROUGH_TOLERANCE_PCT = 0.03
+HEAD_SHOULDERS_SHOULDER_TOLERANCE_PCT = 0.04
+HEAD_SHOULDERS_MIN_SHOULDER_DISTANCE = 10
+HEAD_SHOULDERS_HEAD_PROMINENCE_PCT = 0.03
+
+DOUBLE_BOTTOM_REBOUND_PCT = 0.05
+DOUBLE_TOP_PULLBACK_PCT = 0.05
+DOUBLE_BOTTOM_NECKLINE_CONFIRM_PCT = 0.01
+DOUBLE_TOP_NECKLINE_CONFIRM_PCT = 0.01
+HEAD_SHOULDERS_NECKLINE_BREAK_PCT = 0.01
+
+BACKTEST_BREAKOUT_WINDOW = 60
+BACKTEST_RSI_RECENT_WINDOW = 20
+BACKTEST_RSI_EARLIER_WINDOW = 20
+
+RANK_CONFIDENCE_WEIGHT = 0.7
+RANK_RECENCY_WEIGHT = 0.3
+
+MARKET_HOURS = {
+	"NSE": {"tz": "Asia/Kolkata", "open": "09:15", "close": "15:30"},
+	"NIFTY50": {"tz": "Asia/Kolkata", "open": "09:15", "close": "15:30"},
+	"BSE": {"tz": "Asia/Kolkata", "open": "09:15", "close": "15:30"},
+	"NASDAQ": {"tz": "America/New_York", "open": "09:30", "close": "16:00"},
+	"NYSE": {"tz": "America/New_York", "open": "09:30", "close": "16:00"},
+	"SP500": {"tz": "America/New_York", "open": "09:30", "close": "16:00"},
+	"DAX": {"tz": "Europe/Berlin", "open": "09:00", "close": "17:30"},
+	"FTSE": {"tz": "Europe/London", "open": "08:00", "close": "16:30"},
+	"CRYPTO": {"tz": "UTC", "open": "00:00", "close": "23:59"},
+}
