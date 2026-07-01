@@ -8,12 +8,14 @@ const API_BASE = 'http://127.0.0.1:8004';
 export default function App() {
   const [customTickers, setCustomTickers] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [loadingStep, setLoadingStep] = useState('');
   const [videoUrl, setVideoUrl] = useState(null);
   const [marketData, setMarketData] = useState(null);
   const [error, setError] = useState(null);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
+    setLoadingStep('FETCHING LIVE MARKET DATA...');
     setError(null);
     setVideoUrl(null);
     setMarketData(null);
@@ -24,26 +26,43 @@ export default function App() {
         .map(t => t.trim())
         .filter(t => t.length > 0);
 
-      const response = await fetch(`${API_BASE}/video/generate`, {
+      // STEP 1: Fetch Market Data Sequentially
+      const dataResponse = await fetch(`${API_BASE}/video/market-data`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           video_type: 'full_overview',
           custom_tickers: tickersArray
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
+      if (!dataResponse.ok) {
+        throw new Error(`Data fetch failed: ${dataResponse.status}`);
+      }
+      
+      const dataJson = await dataResponse.json();
+      setMarketData(dataJson.snapshot);
+      
+      // STEP 2: Generate Video
+      setLoadingStep('RENDERING AI VIDEO...');
+      
+      const videoResponse = await fetch(`${API_BASE}/video/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          video_type: 'full_overview',
+          custom_tickers: tickersArray
+        }),
+      });
+
+      if (!videoResponse.ok) {
+        throw new Error(`Video generation failed: ${videoResponse.status}`);
       }
 
-      const data = await response.json();
+      const videoJson = await videoResponse.json();
       
-      if (data.video_url) {
-        setVideoUrl(`${API_BASE}${data.video_url}`);
-        setMarketData(data.snapshot);
+      if (videoJson.video_url) {
+        setVideoUrl(`${API_BASE}${videoJson.video_url}`);
       } else {
         throw new Error("No video URL returned from server.");
       }
@@ -51,6 +70,7 @@ export default function App() {
       setError(err.message || 'An error occurred during generation.');
     } finally {
       setIsGenerating(false);
+      setLoadingStep('');
     }
   };
 
@@ -199,7 +219,7 @@ export default function App() {
             {isGenerating && (
               <div className="loading-state">
                 <div className="spinner"></div>
-                <div>RENDERING VIDEO...</div>
+                <div>{loadingStep}</div>
               </div>
             )}
 

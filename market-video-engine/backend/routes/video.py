@@ -51,6 +51,13 @@ def _resolve_output_dir(policy: dict[str, object]) -> Path:
 	return output_dir
 
 
+@router.post("/market-data")
+async def fetch_market_data(request: VideoRequest) -> dict[str, object]:
+	"""Fetches the live market snapshot immediately for sequential UI rendering."""
+	snapshot = get_market_snapshot(custom_tickers=request.custom_tickers)
+	return {"snapshot": snapshot}
+
+
 @router.post("/generate")
 async def generate_market_video(request: VideoRequest) -> dict[str, object]:
 	"""Generates the combined narrative market video."""
