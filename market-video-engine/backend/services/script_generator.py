@@ -141,15 +141,17 @@ def generate_combined_script(snapshot: dict[str, Any]) -> str:
 
         # Race Chart (~18 words, 8s)
         f"The performance leaderboard shows where long-term leadership is concentrating through this session's move.",
-
-        # FII/DII (~16 words, 6.7s)
-        f"Foreign institutions showed net {fii_dir} of {abs(fii):.0f} crore, while domestic institutions continued {dii_dir}.",
-
-        # IPO Tracker (~15 words, 10.7s)
-        f"In the primary market, {ipo_name} is seeing strong subscription demand with healthy grey market premiums.",
-
-        # Outro (~5 words, 3.3s)
-        "Will be back with more updates.",
     ]
+
+    # FII/DII (~16 words, 6.7s)
+    if flows and (fii != 0 or dii != 0):
+        parts.append(f"Foreign institutions showed net {fii_dir} of {abs(fii):.0f} crore, while domestic institutions continued {dii_dir}.")
+
+    # IPO Tracker (~15 words, 10.7s)
+    if ipos:
+        parts.append(f"In the primary market, {ipo_name} is seeing strong subscription demand with healthy grey market premiums.")
+
+    # Outro (~5 words, 3.3s)
+    parts.append("Will be back with more updates.")
 
     return " ".join(parts)

@@ -6,7 +6,7 @@ import './styles.css';
 const API_BASE = 'http://127.0.0.1:8004';
 
 export default function App() {
-  const [customTickers, setCustomTickers] = useState('');
+  const [targetDate, setTargetDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [videoUrl, setVideoUrl] = useState(null);
@@ -23,18 +23,13 @@ export default function App() {
     setRevealedData({ nifty: false, sectors: false, movers: false });
 
     try {
-      const tickersArray = customTickers
-        .split(',')
-        .map(t => t.trim())
-        .filter(t => t.length > 0);
-
       // STEP 1: Fetch Market Data Sequentially
       const dataResponse = await fetch(`${API_BASE}/video/market-data`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           video_type: 'full_overview',
-          custom_tickers: tickersArray
+          date: targetDate
         }),
       });
 
@@ -66,7 +61,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           video_type: 'full_overview',
-          custom_tickers: tickersArray
+          date: targetDate
         }),
       });
 
@@ -158,7 +153,7 @@ export default function App() {
           {/* Top Movers Chart */}
           {revealedData.movers ? (
             <div className="data-card span-full animate-in">
-              <h3>Top Movers ({customTickers ? 'Custom Basket' : 'Nifty Basket'})</h3>
+              <h3>Top Movers {targetDate && `(${targetDate})`}</h3>
               <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={allMovers} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -201,14 +196,14 @@ export default function App() {
           </div>
           <div className="sidebar-content">
             
-            <label className="input-label">Custom Tickers (Optional)</label>
+            <label className="input-label">Select Historic Date</label>
             <input 
-              type="text" 
-              className="input-field" 
-              placeholder="e.g. RELIANCE, TCS"
-              value={customTickers}
-              onChange={(e) => setCustomTickers(e.target.value)}
+              type="date" 
+              className="input-field"
+              value={targetDate}
+              onChange={(e) => setTargetDate(e.target.value)}
               disabled={isGenerating}
+              max={new Date().toISOString().split('T')[0]}
             />
 
             <button 

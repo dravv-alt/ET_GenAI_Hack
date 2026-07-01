@@ -51,7 +51,7 @@ def _stage_record(name: str, status: str, started_at: str, start_perf: float, de
 async def generate_video(
 	video_type: str,
 	output_path: str,
-	custom_tickers: list[str] | None = None,
+	target_date: str | None = None,
 ) -> dict[str, Any]:
 	"""Generates one combined narrative market video.
 
@@ -73,7 +73,7 @@ async def generate_video(
 	try:
 		stage_started = _now_iso()
 		stage_perf = time.perf_counter()
-		snapshot = get_market_snapshot(top_n=5, custom_tickers=custom_tickers)
+		snapshot = get_market_snapshot(top_n=5, target_date=target_date)
 		stages.append(
 			_stage_record(
 				"fetch_market_data",

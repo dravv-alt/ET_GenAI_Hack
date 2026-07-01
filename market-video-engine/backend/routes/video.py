@@ -54,7 +54,7 @@ def _resolve_output_dir(policy: dict[str, object]) -> Path:
 @router.post("/market-data")
 async def fetch_market_data(request: VideoRequest) -> dict[str, object]:
 	"""Fetches the live market snapshot immediately for sequential UI rendering."""
-	snapshot = get_market_snapshot(custom_tickers=request.custom_tickers)
+	snapshot = get_market_snapshot(target_date=request.date)
 	return {"snapshot": snapshot}
 
 
@@ -71,7 +71,7 @@ async def generate_market_video(request: VideoRequest) -> dict[str, object]:
 	result = await generate_video(
 		video_type=request.video_type.value,
 		output_path=output_path,
-		custom_tickers=request.custom_tickers,
+		target_date=request.date,
 	)
 	status = str(result.get("status", "complete"))
 	record_payload = {
@@ -124,7 +124,7 @@ async def preview_market_script(request: VideoRequest) -> dict[str, object]:
 	stages: list[dict[str, object]] = []
 
 	fetch_started = time.perf_counter()
-	snapshot = get_market_snapshot(top_n=5, custom_tickers=request.custom_tickers)
+	snapshot = get_market_snapshot(top_n=5, target_date=request.date)
 	stages.append(
 		{
 			"stage": "fetch_market_data",

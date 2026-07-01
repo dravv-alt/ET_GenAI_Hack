@@ -1,9 +1,8 @@
 """Market data service for the AI Market Video Engine.
 
-Phase 1 scope:
-- Live market fetchers through yfinance.
-- Deterministic JSON fallbacks under backend/data.
-- Single-call aggregation API for downstream orchestrator use.
+Provides live market data via yfinance and NSE India scrapers.
+No hardcoded fallbacks are used. If data is unavailable for a given historic date,
+the generators will gracefully omit that segment from the video.
 """
 
 from __future__ import annotations
@@ -13,29 +12,30 @@ import io
 import re
 import time
 import logging
+from datetime import datetime, timedelta
 from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from pathlib import Path
 from typing import Any
 
 import yfinance as yf
-
+import requests
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 _SYMBOL_RE = re.compile(r"^[A-Z0-9^._-]{2,20}$")
 
 
-def _load_fallback(filename: str) -> Any:
-	file_path = DATA_DIR / filename
+def _load_market_universe() -> dict[str, Any]:
+	file_path = DATA_DIR / "market_universe.json"
 	with file_path.open("r", encoding="utf-8") as fp:
 		return json.load(fp)
 
 
-def _load_market_universe() -> dict[str, Any]:
-	return _load_fallback("market_universe.json")
-
-
 def _load_fetch_config() -> dict[str, Any]:
-	return _load_fallback("data_fetch_config.json")
+	file_path = DATA_DIR / "data_fetch_config.json"
+	if file_path.exists():
+		with file_path.open("r", encoding="utf-8") as fp:
+			return json.load(fp)
+	return {}
 
 
 def _as_float(value: Any, default: float = 0.0) -> float:
@@ -46,7 +46,6 @@ def _as_float(value: Any, default: float = 0.0) -> float:
 
 
 def _extract_close_change(history_df: Any) -> tuple[float, float] | None:
-	"""Returns (last_close, pct_change) from a yfinance history dataframe."""
 	if history_df is None or history_df.empty:
 		return None
 
@@ -107,11 +106,9 @@ def _with_retry(fetcher: Any, retries: int, backoff_sec: float) -> Any:
 
 @contextmanager
 def _suppress_yfinance_noise():
-	"""Suppresses expected noisy stderr/stdout/logging from yfinance calls."""
 	root_disable_before = logging.root.manager.disable
 	yf_logger = logging.getLogger("yfinance")
 	old_yf_level = yf_logger.level
-
 	try:
 		logging.disable(logging.CRITICAL)
 		yf_logger.setLevel(logging.CRITICAL)
@@ -122,24 +119,46 @@ def _suppress_yfinance_noise():
 		logging.disable(root_disable_before)
 
 
-def get_nifty_data(period: str = "5d") -> dict[str, float]:
-	"""Fetch latest Nifty OHLC and day-over-day change metrics."""
+def _get_history_kwargs(target_date: str | None) -> dict[str, Any]:
+	"""Returns kwargs for yf.download / yf.history to fetch historical or recent window."""
+	if not target_date:
+		return {"period": "5d"}
+	try:
+		# Parse YYYY-MM-DD
+		dt = datetime.strptime(target_date, "%Y-%m-%d")
+		# yfinance end date is exclusive, so we add 1 day
+		end_dt = dt + timedelta(days=1)
+		# Start 10 days earlier to ensure we get at least 2 trading days
+		start_dt = end_dt - timedelta(days=10)
+		return {
+			"start": start_dt.strftime("%Y-%m-%d"),
+			"end": end_dt.strftime("%Y-%m-%d"),
+		}
+	except ValueError:
+		return {"period": "5d"}
+
+
+def get_nifty_data(target_date: str | None = None) -> dict[str, float]:
 	universe = _load_market_universe()
 	fetch_cfg = _load_fetch_config()
-	timeout_sec = _as_float(fetch_cfg.get("timeout_sec", 8), 8.0)
+	timeout_sec = _as_float(fetch_cfg.get("timeout_sec", 60), 60.0)
 	retries = int(_as_float(fetch_cfg.get("retries", 3), 3))
-	retry_backoff_sec = _as_float(fetch_cfg.get("retry_backoff_sec", 0.6), 0.6)
+	retry_backoff_sec = _as_float(fetch_cfg.get("retry_backoff_sec", 1.0), 1.0)
+	
 	nifty_symbol = str(universe.get("nifty_symbol", "")).strip()
 	if not nifty_symbol:
-		return _load_fallback("nifty_fallback.json")
+		return {}
+
+	hist_kwargs = _get_history_kwargs(target_date)
+
 	try:
 		history = _with_retry(
-			lambda: yf.Ticker(nifty_symbol).history(period=period, timeout=timeout_sec),
+			lambda: yf.Ticker(nifty_symbol).history(**hist_kwargs, timeout=timeout_sec),
 			retries=retries,
 			backoff_sec=retry_backoff_sec,
 		)
 		if history.empty:
-			return _load_fallback("nifty_fallback.json")
+			return {}
 
 		latest = history.iloc[-1]
 		prev_close = history.iloc[-2]["Close"] if len(history) > 1 else latest["Open"]
@@ -158,47 +177,48 @@ def get_nifty_data(period: str = "5d") -> dict[str, float]:
 			"change_abs": round(change_abs, 2),
 		}
 	except Exception:
-		return _load_fallback("nifty_fallback.json")
+		return {}
 
 
 def get_top_movers(
 	n: int = 5,
 	max_tickers: int = 20,
-	tickers_override: list[str] | None = None,
+	target_date: str | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
-	"""Return top gainers and losers from a bounded Nifty sample basket."""
-	fallback = _load_fallback("top_movers_fallback.json")
 	universe = _load_market_universe()
 	fetch_cfg = _load_fetch_config()
-	timeout_sec = _as_float(fetch_cfg.get("timeout_sec", 8), 8.0)
+	timeout_sec = _as_float(fetch_cfg.get("timeout_sec", 60), 60.0)
 	retries = int(_as_float(fetch_cfg.get("retries", 3), 3))
-	retry_backoff_sec = _as_float(fetch_cfg.get("retry_backoff_sec", 0.6), 0.6)
-	use_threads = bool(fetch_cfg.get("use_threads", False))
+	retry_backoff_sec = _as_float(fetch_cfg.get("retry_backoff_sec", 1.0), 1.0)
+	use_threads = bool(fetch_cfg.get("use_threads", True))
 	max_tickers_cfg = int(_as_float(fetch_cfg.get("max_tickers", max_tickers), max_tickers))
-	min_valid_movers = int(_as_float(fetch_cfg.get("min_valid_movers", max(6, n * 2)), max(6, n * 2)))
+	min_valid_movers = int(_as_float(fetch_cfg.get("min_valid_movers", max(2, n * 2)), max(2, n * 2)))
 	excluded = set(_sanitize_symbols(list(fetch_cfg.get("exclude_tickers", []))))
 
-	raw_source = tickers_override if tickers_override else list(universe.get("sample_tickers", []))
+	raw_source = list(universe.get("sample_tickers", []))
 	tickers = _sanitize_symbols(raw_source, excluded=excluded)[: min(max_tickers, max_tickers_cfg)]
 	if not tickers:
-		return fallback
+		return {}
+		
+	hist_kwargs = _get_history_kwargs(target_date)
+
 	try:
 		data = _with_retry(
 			lambda: yf.download(
 				tickers=tickers,
-				period="5d",
 				interval="1d",
 				auto_adjust=False,
 				group_by="ticker",
 				progress=False,
 				threads=use_threads,
 				timeout=timeout_sec,
+				**hist_kwargs
 			),
 			retries=retries,
 			backoff_sec=retry_backoff_sec,
 		)
 	except Exception:
-		return fallback
+		return {}
 
 	movers: list[dict[str, Any]] = []
 	for ticker in tickers:
@@ -223,7 +243,7 @@ def get_top_movers(
 			continue
 
 	if len(movers) < min_valid_movers:
-		return fallback
+		return {}
 
 	sorted_movers = sorted(movers, key=lambda item: item["change_pct"], reverse=True)
 	return {
@@ -232,16 +252,14 @@ def get_top_movers(
 	}
 
 
-def get_sector_performance() -> list[dict[str, float | str]]:
-	"""Return sorted sector-wise day performance percentages."""
-	fallback = _load_fallback("sectors_fallback.json")
+def get_sector_performance(target_date: str | None = None) -> list[dict[str, float | str]]:
 	universe = _load_market_universe()
 	fetch_cfg = _load_fetch_config()
-	timeout_sec = _as_float(fetch_cfg.get("timeout_sec", 8), 8.0)
+	timeout_sec = _as_float(fetch_cfg.get("timeout_sec", 60), 60.0)
 	retries = int(_as_float(fetch_cfg.get("retries", 3), 3))
-	retry_backoff_sec = _as_float(fetch_cfg.get("retry_backoff_sec", 0.6), 0.6)
-	use_threads = bool(fetch_cfg.get("use_threads", False))
-	min_valid_sectors = int(_as_float(fetch_cfg.get("min_valid_sectors", 4), 4))
+	retry_backoff_sec = _as_float(fetch_cfg.get("retry_backoff_sec", 1.0), 1.0)
+	use_threads = bool(fetch_cfg.get("use_threads", True))
+	min_valid_sectors = int(_as_float(fetch_cfg.get("min_valid_sectors", 2), 2))
 
 	raw_sector_symbols = dict(universe.get("sector_symbols", {}))
 	sector_symbols = {
@@ -250,26 +268,28 @@ def get_sector_performance() -> list[dict[str, float | str]]:
 		if _sanitize_symbol(symbol)
 	}
 	if not sector_symbols:
-		return fallback
+		return []
 
 	symbols = list(sector_symbols.values())
+	hist_kwargs = _get_history_kwargs(target_date)
+
 	try:
 		data = _with_retry(
 			lambda: yf.download(
 				tickers=symbols,
-				period="5d",
 				interval="1d",
 				auto_adjust=False,
 				group_by="ticker",
 				progress=False,
 				threads=use_threads,
 				timeout=timeout_sec,
+				**hist_kwargs
 			),
 			retries=retries,
 			backoff_sec=retry_backoff_sec,
 		)
 	except Exception:
-		return fallback
+		return []
 
 	results: list[dict[str, float | str]] = []
 	for sector_name, symbol in sector_symbols.items():
@@ -285,42 +305,65 @@ def get_sector_performance() -> list[dict[str, float | str]]:
 			continue
 
 	if len(results) < min_valid_sectors:
-		return fallback
+		return []
 	return sorted(results, key=lambda item: item["change_pct"], reverse=True)
 
 
-def get_fii_dii_flows() -> dict[str, Any]:
-	"""Return latest FII/DII net flow summary.
+def get_fii_dii_flows(target_date: str | None = None) -> dict[str, Any]:
+	"""Scrapes real FII/DII data from NSE India API. No fake fallbacks used."""
+	try:
+		url = 'https://www.nseindia.com/api/fiidiiTradeReact'
+		headers = {
+			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+			'Accept': '*/*',
+		}
+		s = requests.Session()
+		s.get('https://www.nseindia.com', headers=headers, timeout=5)
+		r = s.get(url, headers=headers, timeout=5)
+		if r.status_code == 200:
+			data = r.json()
+			fii_net = 0.0
+			dii_net = 0.0
+			for row in data:
+				# If a specific historic date is requested, and NSE's latest response doesn't match,
+				# we gracefully omit the FII/DII data rather than showing fake/latest data.
+				if target_date:
+					parsed_dt = datetime.strptime(row.get('date', ''), '%d-%b-%Y')
+					requested_dt = datetime.strptime(target_date, '%Y-%m-%d')
+					if parsed_dt.date() != requested_dt.date():
+						return {}
+						
+				cat = row.get("category", "")
+				if "FII" in cat:
+					fii_net = float(row.get("netValue", 0))
+				elif "DII" in cat:
+					dii_net = float(row.get("netValue", 0))
+					
+			if fii_net or dii_net:
+				return {
+					"fii_net_cr": fii_net,
+					"dii_net_cr": dii_net
+				}
+	except Exception:
+		pass
+	return {}
 
-	Live exchange-grade ingestion will be added in a later phase.
-	For Phase 1, we use a deterministic fallback payload.
-	"""
-	return _load_fallback("fii_dii_fallback.json")
+
+def get_ipo_data(target_date: str | None = None) -> list[dict[str, Any]]:
+	"""Returns empty list. No historic IPO tracking API is available reliably.
+	Since we strictly enforce NO fallbacks, we simply omit IPOs for historic renders."""
+	return []
 
 
-def get_ipo_data() -> list[dict[str, Any]]:
-	"""Return IPO tracker payload.
-
-	Live IPO scraping/API integration will be added in a later phase.
-	For Phase 1, we use a deterministic fallback payload.
-	"""
-	return _load_fallback("ipo_fallback.json")
-
-
-def get_market_snapshot(top_n: int = 5, custom_tickers: list[str] | None = None) -> dict[str, Any]:
-	"""One-call aggregate payload used by the orchestrator.
-
-	This ensures data is fetched once per generation request.
-	When custom_tickers are provided, top movers are computed from that basket.
-	"""
+def get_market_snapshot(top_n: int = 5, target_date: str | None = None) -> dict[str, Any]:
 	return {
-		"nifty": get_nifty_data(),
-		"movers": get_top_movers(n=top_n, tickers_override=custom_tickers),
-		"sectors": get_sector_performance(),
-		"fii_dii": get_fii_dii_flows(),
-		"ipos": get_ipo_data(),
+		"nifty": get_nifty_data(target_date),
+		"movers": get_top_movers(n=top_n, target_date=target_date),
+		"sectors": get_sector_performance(target_date),
+		"fii_dii": get_fii_dii_flows(target_date),
+		"ipos": get_ipo_data(target_date),
 		"scope": {
-			"custom_tickers_count": len(custom_tickers or []),
-			"is_custom_scope": bool(custom_tickers),
+			"target_date": target_date,
+			"is_historic": bool(target_date),
 		},
 	}
