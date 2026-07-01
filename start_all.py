@@ -5,14 +5,24 @@ import sys
 import webbrowser
 
 def run_process(name, cmd, cwd):
-    print(f"Starting {name}...")
-    # On Windows, shell=True helps resolve npm/uvicorn commands reliably
+    print(f"Starting {name} in {cwd}...")
+    
+    # Auto-run npm install if it's a frontend and node_modules is missing
+    if "frontend" in cwd and not os.path.exists(os.path.join(cwd, "node_modules")):
+        print(f"[{name}] node_modules missing. Running npm install first...")
+        subprocess.run("npm install", cwd=cwd, shell=True)
+
+    # Auto-run pip install if it's a backend (very quick if already installed)
+    if "backend" in cwd and os.path.exists(os.path.join(cwd, "requirements.txt")):
+        print(f"[{name}] Ensuring requirements are installed...")
+        subprocess.run(f"{sys.executable} -m pip install -r requirements.txt", cwd=cwd, shell=True)
+
+    # On Windows, shell=True helps resolve commands reliably
+    # We remove DEVNULL so you can actually see if it crashes!
     return subprocess.Popen(
         cmd,
         cwd=cwd,
-        shell=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
+        shell=True
     )
 
 if __name__ == "__main__":
@@ -33,7 +43,7 @@ if __name__ == "__main__":
     # 3. Start Launchpad
     if not os.path.exists("launchpad"):
         os.makedirs("launchpad")
-    processes.append(run_process("Launchpad UI", f"{sys.executable} -m http.server 3000 --directory launchpad", "."))
+    processes.append(run_process("Launchpad UI", f"{sys.executable} -m http.server 3000", "launchpad"))
 
     print("\nAll services started!")
     print("Wait a few seconds for React/Vite servers to compile...")
