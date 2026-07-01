@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './styles.css';
 
-const API_BASE = 'http://localhost:8004';
+const API_BASE = 'http://127.0.0.1:8004';
 
 export default function App() {
   const [customTickers, setCustomTickers] = useState('');
@@ -52,90 +52,97 @@ export default function App() {
   return (
     <div className="dashboard">
       
-      {/* Sidebar Control Panel */}
-      <aside className="sidebar">
+      {/* Top Header */}
+      <header className="top-header">
         <div className="brand">
-          <i className="fa-solid fa-video"></i>
-          Market Video Engine
+          <i className="fa-solid fa-film"></i>
+          AI MARKET VIDEO ENGINE
         </div>
+      </header>
 
-        <div className="section-title">Custom Tickers (Optional)</div>
-        <div className="input-group">
-          <input 
-            type="text" 
-            className="input-field" 
-            placeholder="e.g. RELIANCE, TCS, INFY"
-            value={customTickers}
-            onChange={(e) => setCustomTickers(e.target.value)}
-            disabled={isGenerating}
-          />
-        </div>
-
-        <button 
-          className="generate-btn" 
-          onClick={handleGenerate} 
-          disabled={isGenerating}
-        >
-          {isGenerating ? (
-            <>
-              <i className="fa-solid fa-spinner fa-spin"></i> Generating...
-            </>
-          ) : (
-            <>
-              <i className="fa-solid fa-wand-magic-sparkles"></i> Generate Video
-            </>
-          )}
-        </button>
-
-        {error && (
-          <div style={{ marginTop: '20px', color: '#ef4444', fontSize: '13px', textAlign: 'center' }}>
-            <i className="fa-solid fa-triangle-exclamation"></i> {error}
+      <div className="main-layout">
+        {/* Sidebar Control Panel */}
+        <aside className="sidebar">
+          <div className="sidebar-header">
+            Render Controls
           </div>
-        )}
-      </aside>
+          <div className="sidebar-content">
+            
+            <label className="input-label">Custom Tickers (Optional)</label>
+            <input 
+              type="text" 
+              className="input-field" 
+              placeholder="e.g. RELIANCE, TCS"
+              value={customTickers}
+              onChange={(e) => setCustomTickers(e.target.value)}
+              disabled={isGenerating}
+            />
 
-      {/* Main Stage */}
-      <main className="main-stage">
-        <div className="video-container">
-          
-          {isGenerating && (
-            <div className="loading-state">
-              <div className="spinner"></div>
-              <div className="status-text">AI is rendering your video...</div>
-            </div>
-          )}
-
-          {!isGenerating && !videoUrl && (
-            <div className="placeholder-content">
-              <i className="fa-regular fa-circle-play"></i>
-              <h2>No Video Generated</h2>
-              <p style={{ marginTop: '10px', fontSize: '14px', color: 'var(--text-muted)' }}>
-                Select your format and hit Generate to start.
-              </p>
-            </div>
-          )}
-
-          {!isGenerating && videoUrl && (
-            <video 
-              className="video-player" 
-              controls 
-              autoPlay
-              src={videoUrl}
+            <button 
+              className="generate-btn" 
+              onClick={handleGenerate} 
+              disabled={isGenerating}
             >
-              Your browser does not support the video tag.
-            </video>
-          )}
-          
-        </div>
+              {isGenerating ? (
+                <>
+                  <i className="fa-solid fa-spinner fa-spin"></i> GENERATING...
+                </>
+              ) : (
+                <>
+                  <i className="fa-solid fa-play"></i> GENERATE VIDEO
+                </>
+              )}
+            </button>
 
-        {videoUrl && !isGenerating && (
-          <div className="download-bar">
-            <a href={videoUrl} download className="download-btn">
-              <i className="fa-solid fa-download"></i> Download .mp4
-            </a>
+            {error && (
+              <div className="error-msg">
+                <i className="fa-solid fa-circle-exclamation"></i> {error}
+              </div>
+            )}
           </div>
-        )}
-      </main>
+        </aside>
+
+        {/* Main Stage */}
+        <main className="main-stage">
+          <div className="video-container">
+            
+            {isGenerating && (
+              <div className="loading-state">
+                <div className="spinner"></div>
+                <div>RENDERING VIDEO...</div>
+              </div>
+            )}
+
+            {!isGenerating && !videoUrl && (
+              <div className="placeholder-content">
+                <i className="fa-regular fa-file-video"></i>
+                <div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '4px', fontFamily: 'var(--sans)' }}>No Video Loaded</div>
+                <div>Enter tickers and click Generate</div>
+              </div>
+            )}
+
+            {!isGenerating && videoUrl && (
+              <video 
+                className="video-player" 
+                controls 
+                autoPlay
+                src={videoUrl}
+              >
+                Your browser does not support the video tag.
+              </video>
+            )}
+            
+          </div>
+
+          {videoUrl && !isGenerating && (
+            <div className="download-bar">
+              <a href={videoUrl} download className="download-btn">
+                <i className="fa-solid fa-download"></i> Download MP4
+              </a>
+            </div>
+          )}
+        </main>
+      </div>
 
     </div>
   );
