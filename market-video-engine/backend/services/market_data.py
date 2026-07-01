@@ -17,6 +17,7 @@ from contextlib import contextmanager, redirect_stderr, redirect_stdout
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import yfinance as yf
 import requests
 
@@ -124,11 +125,8 @@ def _get_history_kwargs(target_date: str | None) -> dict[str, Any]:
 	if not target_date:
 		return {"period": "5d"}
 	try:
-		# Parse YYYY-MM-DD
 		dt = datetime.strptime(target_date, "%Y-%m-%d")
-		# yfinance end date is exclusive, so we add 1 day
 		end_dt = dt + timedelta(days=1)
-		# Start 10 days earlier to ensure we get at least 2 trading days
 		start_dt = end_dt - timedelta(days=10)
 		return {
 			"start": start_dt.strftime("%Y-%m-%d"),
@@ -136,6 +134,48 @@ def _get_history_kwargs(target_date: str | None) -> dict[str, Any]:
 		}
 	except ValueError:
 		return {"period": "5d"}
+
+
+def _download_stitched(tickers: list[str] | str, target_date: str | None, timeout_sec: float, retries: int, retry_backoff_sec: float, use_threads: bool = True, is_single: bool = False) -> Any:
+	"""Fetches yfinance data. Stitches historical api with live api to bypass the 1-day Yahoo Finance lag bug."""
+	hist_kwargs = _get_history_kwargs(target_date)
+	
+	def fetch_data(kwargs: dict):
+		if is_single:
+			return yf.Ticker(tickers).history(timeout=timeout_sec, **kwargs)
+		else:
+			return yf.download(
+				tickers=tickers,
+				interval="1d",
+				auto_adjust=False,
+				group_by="ticker",
+				progress=False,
+				threads=use_threads,
+				timeout=timeout_sec,
+				**kwargs
+			)
+
+	hist_df = _with_retry(lambda: fetch_data(hist_kwargs), retries, retry_backoff_sec)
+	
+	try:
+		live_df = _with_retry(lambda: fetch_data({"period": "1d"}), 1, 0.0)
+		if not live_df.empty:
+			df = pd.concat([hist_df, live_df])
+			df = df[~df.index.duplicated(keep='last')]
+			df = df.sort_index()
+		else:
+			df = hist_df
+	except Exception:
+		df = hist_df
+		
+	if target_date and not df.empty:
+		try:
+			target_dt = datetime.strptime(target_date, "%Y-%m-%d").date()
+			df = df[df.index.date <= target_dt]
+		except Exception:
+			pass
+			
+	return df
 
 
 def get_nifty_data(target_date: str | None = None) -> dict[str, float]:
@@ -149,14 +189,8 @@ def get_nifty_data(target_date: str | None = None) -> dict[str, float]:
 	if not nifty_symbol:
 		return {}
 
-	hist_kwargs = _get_history_kwargs(target_date)
-
 	try:
-		history = _with_retry(
-			lambda: yf.Ticker(nifty_symbol).history(**hist_kwargs, timeout=timeout_sec),
-			retries=retries,
-			backoff_sec=retry_backoff_sec,
-		)
+		history = _download_stitched(nifty_symbol, target_date, timeout_sec, retries, retry_backoff_sec, is_single=True)
 		if history.empty:
 			return {}
 
@@ -176,7 +210,7 @@ def get_nifty_data(target_date: str | None = None) -> dict[str, float]:
 			"change_pct": round(change_pct, 2),
 			"change_abs": round(change_abs, 2),
 		}
-	except Exception:
+	except Exception as e:
 		return {}
 
 
@@ -200,23 +234,8 @@ def get_top_movers(
 	if not tickers:
 		return {}
 		
-	hist_kwargs = _get_history_kwargs(target_date)
-
 	try:
-		data = _with_retry(
-			lambda: yf.download(
-				tickers=tickers,
-				interval="1d",
-				auto_adjust=False,
-				group_by="ticker",
-				progress=False,
-				threads=use_threads,
-				timeout=timeout_sec,
-				**hist_kwargs
-			),
-			retries=retries,
-			backoff_sec=retry_backoff_sec,
-		)
+		data = _download_stitched(tickers, target_date, timeout_sec, retries, retry_backoff_sec, use_threads=use_threads)
 	except Exception:
 		return {}
 
@@ -271,23 +290,9 @@ def get_sector_performance(target_date: str | None = None) -> list[dict[str, flo
 		return []
 
 	symbols = list(sector_symbols.values())
-	hist_kwargs = _get_history_kwargs(target_date)
 
 	try:
-		data = _with_retry(
-			lambda: yf.download(
-				tickers=symbols,
-				interval="1d",
-				auto_adjust=False,
-				group_by="ticker",
-				progress=False,
-				threads=use_threads,
-				timeout=timeout_sec,
-				**hist_kwargs
-			),
-			retries=retries,
-			backoff_sec=retry_backoff_sec,
-		)
+		data = _download_stitched(symbols, target_date, timeout_sec, retries, retry_backoff_sec, use_threads=use_threads)
 	except Exception:
 		return []
 
