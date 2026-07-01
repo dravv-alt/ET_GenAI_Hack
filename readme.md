@@ -20,10 +20,10 @@ one teammate going down does NOT block others.
 
 | # | Product | Teammate | Folder | Status |
 |---|---------|----------|--------|--------|
-| 1 | **Opportunity Radar** | T1 | `/opportunity-radar/` | 🔴 Todo |
-| 2 | **Chart Pattern Intelligence** | T2 | `/chart-pattern-intel/` | 🔴 Todo |
-| 3 | **Market ChatGPT — Next Gen** | T3 | `/market-chatgpt/` | 🔴 Todo |
-| 4 | **AI Market Video Engine** | T4 | `/market-video-engine/` | 🔴 Todo |
+| 1 | **Opportunity Radar** | T1 | `/opportunity-radar/` | 🟢 Done |
+| 2 | **Chart Pattern Intelligence** | T2 | `/chart-pattern-intel/` | 🟢 Done |
+| 3 | **Market ChatGPT — Next Gen** | T3 | `/market-chatgpt/` | 🟢 Done |
+| 4 | **AI Market Video Engine** | T4 | `/market-video-engine/` | 🟢 Done |
 
 > Update status as you build: 🔴 Todo → 🟡 In Progress → 🟢 Done
 
@@ -222,12 +222,12 @@ The 4 products are **independent** and demoed separately. For the final pitch:
 
 ## Submission requirements checklist
 
-- [ ] Public GitHub repo with full commit history showing 12-hour build
-- [ ] This README with setup instructions
-- [ ] `/docs/ARCHITECTURE.md` — all 4 agent architectures (1–2 pages)
-- [ ] `/docs/IMPACT_MODEL.md` — quantified business impact
-- [ ] 3-minute pitch video (record at H10–H11)
-- [ ] Live demo of all 4 products working
+- [x] Public GitHub repo with full commit history showing 12-hour build
+- [x] This README with setup instructions
+- [x] `/docs/ARCHITECTURE.md` — all 4 agent architectures (1–2 pages)
+- [x] `/docs/IMPACT_MODEL.md` — quantified business impact
+- [x] 3-minute pitch video (record at H10–H11)
+- [x] Live demo of all 4 products working
 
 ---
 
