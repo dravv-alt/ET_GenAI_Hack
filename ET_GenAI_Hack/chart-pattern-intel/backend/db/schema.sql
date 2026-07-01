@@ -1,2 +1,0 @@
--- SQLite schema for cached chart data and backtest results
--- TODO: create tables for ohlcv cache and backtests.

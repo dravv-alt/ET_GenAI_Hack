@@ -26,6 +26,7 @@ export default function App() {
   const [time, setTime] = useState(fmtTime());
   const [showBacktest, setShowBacktest] = useState(false);
   const [period, setPeriod] = useState('1y');
+  const [intraday, setIntraday] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [mtfConfirm, setMtfConfirm] = useState(false);
   const [scanStatus, setScanStatus] = useState('idle');
@@ -79,11 +80,22 @@ export default function App() {
   useEffect(() => {
     let active = true;
     async function load() {
+      if (!ticker) {
+        setStatus('idle');
+        setError('');
+        setChart(null);
+        setPatterns([]);
+        setLevels([]);
+        setEnsemble(null);
+        return;
+      }
       setStatus('loading');
       setError('');
       try {
+        const chartPeriod = intraday ? '5d' : period;
+        const chartInterval = intraday ? '5m' : '1d';
         const [chartResp, patternResp] = await Promise.all([
-          fetchChart(ticker, period, market),
+          fetchChart(ticker, chartPeriod, market, chartInterval),
           fetchPatterns(ticker, period, market, mtfConfirm),
         ]);
         if (!active) return;
@@ -103,7 +115,8 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [ticker, period, refreshTick, market, mtfConfirm]);
+  }, [ticker, period, refreshTick, market, mtfConfirm, intraday]);
+  
 
   const runScan = async () => {
     setScanStatus('loading');
@@ -174,7 +187,7 @@ export default function App() {
     if (!selected) return;
     setLlmStatus('loading');
     try {
-      const resp = await fetchExplain(selected, backtest);
+      const resp = await fetchExplain(selected, backtest, market);
       setLlmExplanation(resp.explanation || '');
       setLlmSource(resp.source || '');
       setLlmStatus('ready');
@@ -338,6 +351,16 @@ export default function App() {
                   <option value="5y">5Y</option>
                 </select>
               </div>
+              <button
+                type="button"
+                className={`chart-toggle ${intraday ? 'active' : ''}`}
+                onClick={() => setIntraday((prev) => !prev)}
+              >
+                INTRADAY 5M {intraday ? 'ON' : 'OFF'}
+              </button>
+              {intraday && (
+                <span className="chart-note">LAST 5D</span>
+              )}
             </div>
           </div>
           <div style={{ padding: 12, display: 'grid', gap: 12 }}>
@@ -358,6 +381,8 @@ export default function App() {
                 ohlcv={chart.ohlcv}
                 levels={levels}
                 patterns={patterns}
+                selected={selected}
+                onSelectPattern={setSelected}
                 formatPrice={formatPrice}
               />
             )}

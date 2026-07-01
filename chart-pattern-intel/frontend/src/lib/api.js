@@ -12,8 +12,8 @@ async function request(path) {
   return resp.json();
 }
 
-export function fetchChart(ticker, period = '6mo', market = 'NSE') {
-  return request(`/chart/${ticker}?period=${period}&market=${market}`);
+export function fetchChart(ticker, period = '6mo', market = 'NSE', interval = '1d') {
+  return request(`/chart/${ticker}?period=${period}&market=${market}&interval=${interval}`);
 }
 
 export function fetchPatterns(ticker, period = '1y', market = 'NSE', mtf = false) {
@@ -37,11 +37,11 @@ export async function fetchScan(tickers, period = '6mo', limit = 20, market = 'N
   return resp.json();
 }
 
-export async function fetchExplain(pattern, backtest) {
+export async function fetchExplain(pattern, backtest, market) {
   const resp = await fetch(`${BASE_URL}/explain`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ pattern, backtest })
+    body: JSON.stringify({ pattern, backtest, market })
   });
   if (!resp.ok) {
     const text = await resp.text();

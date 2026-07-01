@@ -1,2 +1,0 @@
--- SQLite schema for portfolio uploads and cached RAG docs
--- TODO: create tables for holdings and docs.

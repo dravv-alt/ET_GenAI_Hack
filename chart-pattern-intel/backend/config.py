@@ -58,6 +58,23 @@ MTF_INTERVALS = {
 
 PRECOMPUTE_ENABLED = True
 PRECOMPUTE_INTERVAL_SECONDS = 900
+import json
+from pathlib import Path
+
+def _load_nifty50() -> list[str]:
+	try:
+		p = Path(__file__).resolve().parent / "data" / "nifty50.json"
+		if p.exists():
+			with p.open("r", encoding="utf-8") as fp:
+				items = json.load(fp)
+				if isinstance(items, list) and items:
+					return [str(x).upper() for x in items]
+	except Exception:
+		pass
+	return ["RELIANCE", "TCS", "HDFCBANK", "INFY"]
+
+NIFTY50_LIST = _load_nifty50()
+
 PRECOMPUTE_UNIVERSE = {
 	"NSE": ["RELIANCE", "TCS", "HDFCBANK", "INFY"],
 	"NASDAQ": ["AAPL", "MSFT", "NVDA", "AMZN"],
@@ -67,7 +84,7 @@ PRECOMPUTE_UNIVERSE = {
 	"FTSE": ["HSBA", "AZN", "VOD"],
 	"BSE": ["RELIANCE", "TCS", "HDFCBANK", "INFY"],
 	"CRYPTO": ["BTC-USD", "ETH-USD"],
-	"NIFTY50": ["RELIANCE", "TCS", "HDFCBANK", "INFY"],
+	"NIFTY50": NIFTY50_LIST,
 }
 PRECOMPUTE_PATTERNS = [
 	"breakout",
@@ -111,3 +128,15 @@ BACKTEST_RSI_EARLIER_WINDOW = 20
 
 RANK_CONFIDENCE_WEIGHT = 0.7
 RANK_RECENCY_WEIGHT = 0.3
+
+MARKET_HOURS = {
+	"NSE": {"tz": "Asia/Kolkata", "open": "09:15", "close": "15:30"},
+	"NIFTY50": {"tz": "Asia/Kolkata", "open": "09:15", "close": "15:30"},
+	"BSE": {"tz": "Asia/Kolkata", "open": "09:15", "close": "15:30"},
+	"NASDAQ": {"tz": "America/New_York", "open": "09:30", "close": "16:00"},
+	"NYSE": {"tz": "America/New_York", "open": "09:30", "close": "16:00"},
+	"SP500": {"tz": "America/New_York", "open": "09:30", "close": "16:00"},
+	"DAX": {"tz": "Europe/Berlin", "open": "09:00", "close": "17:30"},
+	"FTSE": {"tz": "Europe/London", "open": "08:00", "close": "16:30"},
+	"CRYPTO": {"tz": "UTC", "open": "00:00", "close": "23:59"},
+}

@@ -1,5 +1,0 @@
-# Backend dependencies for Opportunity Radar
-fastapi
-uvicorn
-requests
-python-dotenv
