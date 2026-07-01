@@ -92,6 +92,7 @@ async def generate_market_video(request: VideoRequest) -> dict[str, object]:
 			"error": result.get("error", "Video generation failed"),
 			"stages": result.get("stages", []),
 			"scope": result.get("scope", {}),
+			"snapshot": result.get("snapshot", {}),
 			"cleanup": cleanup_result,
 		}
 
@@ -104,6 +105,7 @@ async def generate_market_video(request: VideoRequest) -> dict[str, object]:
 		"frame_count": result.get("frame_count", 0),
 		"stages": result.get("stages", []),
 		"scope": result.get("scope", {}),
+		"snapshot": result.get("snapshot", {}),
 		"cleanup": cleanup_result,
 	}
 

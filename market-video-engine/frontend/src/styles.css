@@ -163,7 +163,6 @@ html, body, #root {
   padding: 24px;
   background-color: var(--bg);
   align-items: center;
-  justify-content: center;
   overflow-y: auto;
 }
 
@@ -179,6 +178,7 @@ html, body, #root {
   align-items: center;
   justify-content: center;
   position: relative;
+  flex-shrink: 0;
 }
 
 .video-player {
@@ -259,4 +259,93 @@ html, body, #root {
   font-family: var(--sans);
   font-size: 12px;
   border-radius: 2px;
+}
+
+/* Market Data Panel */
+.data-panel {
+  width: 100%;
+  max-width: 800px;
+  margin-top: 40px;
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-dark);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 40px;
+}
+
+.data-header {
+  padding: 12px 16px;
+  background-color: var(--header-sub);
+  color: var(--text-header);
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 0;
+}
+
+.data-card {
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+.data-card.span-full {
+  grid-column: 1 / -1;
+  border-bottom: none;
+  border-right: none;
+}
+
+.data-card h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+/* Tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.data-table td {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.text-right { text-align: right; }
+.font-bold { font-weight: 600; color: var(--text-primary) !important; }
+.text-green { color: var(--green) !important; }
+.text-red { color: var(--red) !important; }
+
+/* Charts */
+.chart-wrapper {
+  width: 100%;
+  height: 200px;
+  margin-top: 10px;
+}
+
+.animate-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

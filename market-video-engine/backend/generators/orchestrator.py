@@ -198,6 +198,7 @@ async def generate_video(
 			"frame_count": len(frames),
 			"stages": stages,
 			"scope": snapshot.get("scope", {}),
+			"snapshot": snapshot,
 		}
 	except Exception as exc:
 		stages.append(

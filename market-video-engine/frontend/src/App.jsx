@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
+import { TrendingUp, TrendingDown, Activity, Info } from 'lucide-react';
 import './styles.css';
 
 const API_BASE = 'http://127.0.0.1:8004';
@@ -7,12 +9,14 @@ export default function App() {
   const [customTickers, setCustomTickers] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
+  const [marketData, setMarketData] = useState(null);
   const [error, setError] = useState(null);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     setError(null);
     setVideoUrl(null);
+    setMarketData(null);
 
     try {
       const tickersArray = customTickers
@@ -39,6 +43,7 @@ export default function App() {
       
       if (data.video_url) {
         setVideoUrl(`${API_BASE}${data.video_url}`);
+        setMarketData(data.snapshot);
       } else {
         throw new Error("No video URL returned from server.");
       }
@@ -47,6 +52,91 @@ export default function App() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const renderDataPanel = () => {
+    if (!marketData) return null;
+
+    const { nifty, movers, sectors } = marketData;
+    
+    // Format data for Recharts
+    const topGainers = movers?.gainers?.slice(0, 5) || [];
+    const topLosers = movers?.losers?.slice(0, 5) || [];
+    const allMovers = [...topGainers, ...topLosers].sort((a, b) => b.change_pct - a.change_pct);
+
+    return (
+      <div className="data-panel animate-in">
+        <div className="data-header">
+          <Info size={16} /> 
+          <span>MARKET DATA CROSS-VERIFICATION</span>
+        </div>
+        
+        <div className="data-grid">
+          {/* Nifty 50 Table */}
+          <div className="data-card">
+            <h3>Nifty 50 Snapshot</h3>
+            <table className="data-table">
+              <tbody>
+                <tr><td>Open</td><td className="text-right">{nifty?.open?.toLocaleString()}</td></tr>
+                <tr><td>High</td><td className="text-right">{nifty?.high?.toLocaleString()}</td></tr>
+                <tr><td>Low</td><td className="text-right">{nifty?.low?.toLocaleString()}</td></tr>
+                <tr>
+                  <td>Close</td>
+                  <td className="text-right font-bold">{nifty?.close?.toLocaleString()}</td>
+                </tr>
+                <tr>
+                  <td>Change</td>
+                  <td className={`text-right font-bold ${nifty?.change_pct >= 0 ? 'text-green' : 'text-red'}`}>
+                    {nifty?.change_abs > 0 ? '+' : ''}{nifty?.change_abs} ({nifty?.change_pct}%)
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Sector Chart */}
+          <div className="data-card">
+            <h3>Sector Rotation (Day % Change)</h3>
+            <div className="chart-wrapper">
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={sectors} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis dataKey="sector" tick={{fontSize: 10}} interval={0} angle={-45} textAnchor="end" height={50} />
+                  <YAxis tick={{fontSize: 10}} />
+                  <Tooltip cursor={{fill: 'var(--bg-hover)'}} contentStyle={{borderRadius: 2, border: '1px solid var(--border-dark)', fontSize: '12px'}} />
+                  <Bar dataKey="change_pct" radius={[2, 2, 0, 0]}>
+                    {sectors?.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.change_pct >= 0 ? 'var(--green)' : 'var(--red)'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Top Movers Chart */}
+          <div className="data-card span-full">
+            <h3>Top Movers ({customTickers ? 'Custom Basket' : 'Nifty Basket'})</h3>
+            <div className="chart-wrapper">
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={allMovers} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis dataKey="ticker" tick={{fontSize: 11}} />
+                  <YAxis tick={{fontSize: 10}} />
+                  <Tooltip cursor={{fill: 'var(--bg-hover)'}} contentStyle={{borderRadius: 2, border: '1px solid var(--border-dark)', fontSize: '12px'}} />
+                  <Bar dataKey="change_pct" radius={[2, 2, 0, 0]}>
+                    {allMovers.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.change_pct >= 0 ? 'var(--green)' : 'var(--red)'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -141,6 +231,10 @@ export default function App() {
               </a>
             </div>
           )}
+
+          {/* Verification Data Panel */}
+          {renderDataPanel()}
+
         </main>
       </div>
 
