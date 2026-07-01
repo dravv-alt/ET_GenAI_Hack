@@ -11,6 +11,7 @@ export default function App() {
   const [loadingStep, setLoadingStep] = useState('');
   const [videoUrl, setVideoUrl] = useState(null);
   const [marketData, setMarketData] = useState(null);
+  const [revealedData, setRevealedData] = useState({ nifty: false, sectors: false, movers: false });
   const [error, setError] = useState(null);
 
   const handleGenerate = async () => {
@@ -19,6 +20,7 @@ export default function App() {
     setError(null);
     setVideoUrl(null);
     setMarketData(null);
+    setRevealedData({ nifty: false, sectors: false, movers: false });
 
     try {
       const tickersArray = customTickers
@@ -43,8 +45,21 @@ export default function App() {
       const dataJson = await dataResponse.json();
       setMarketData(dataJson.snapshot);
       
-      // STEP 2: Generate Video
-      setLoadingStep('RENDERING AI VIDEO...');
+      // STEP 2: Staggered reveal to keep user engaged while video generates
+      setTimeout(() => {
+        setRevealedData(prev => ({ ...prev, nifty: true }));
+        setLoadingStep('SCANNING SECTOR ROTATION...');
+      }, 500);
+
+      setTimeout(() => {
+        setRevealedData(prev => ({ ...prev, sectors: true }));
+        setLoadingStep('IDENTIFYING TOP MOVERS...');
+      }, 2500);
+
+      setTimeout(() => {
+        setRevealedData(prev => ({ ...prev, movers: true }));
+        setLoadingStep('WRITING AI NARRATIVE SCRIPT & RENDERING VIDEO...');
+      }, 4500);
       
       const videoResponse = await fetch(`${API_BASE}/video/generate`, {
         method: 'POST',
@@ -71,6 +86,8 @@ export default function App() {
     } finally {
       setIsGenerating(false);
       setLoadingStep('');
+      // Reveal everything in case of quick finish or error
+      setRevealedData({ nifty: true, sectors: true, movers: true });
     }
   };
 
@@ -88,71 +105,77 @@ export default function App() {
       <div className="data-panel animate-in">
         <div className="data-header">
           <Info size={16} /> 
-          <span>MARKET DATA CROSS-VERIFICATION</span>
+          <span>LIVE MARKET DATA CROSS-VERIFICATION</span>
         </div>
         
         <div className="data-grid">
           {/* Nifty 50 Table */}
-          <div className="data-card">
-            <h3>Nifty 50 Snapshot</h3>
-            <table className="data-table">
-              <tbody>
-                <tr><td>Open</td><td className="text-right">{nifty?.open?.toLocaleString()}</td></tr>
-                <tr><td>High</td><td className="text-right">{nifty?.high?.toLocaleString()}</td></tr>
-                <tr><td>Low</td><td className="text-right">{nifty?.low?.toLocaleString()}</td></tr>
-                <tr>
-                  <td>Close</td>
-                  <td className="text-right font-bold">{nifty?.close?.toLocaleString()}</td>
-                </tr>
-                <tr>
-                  <td>Change</td>
-                  <td className={`text-right font-bold ${nifty?.change_pct >= 0 ? 'text-green' : 'text-red'}`}>
-                    {nifty?.change_abs > 0 ? '+' : ''}{nifty?.change_abs} ({nifty?.change_pct}%)
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          {revealedData.nifty ? (
+            <div className="data-card animate-in">
+              <h3>Nifty 50 Snapshot</h3>
+              <table className="data-table">
+                <tbody>
+                  <tr><td>Open</td><td className="text-right">{nifty?.open?.toLocaleString()}</td></tr>
+                  <tr><td>High</td><td className="text-right">{nifty?.high?.toLocaleString()}</td></tr>
+                  <tr><td>Low</td><td className="text-right">{nifty?.low?.toLocaleString()}</td></tr>
+                  <tr>
+                    <td>Close</td>
+                    <td className="text-right font-bold">{nifty?.close?.toLocaleString()}</td>
+                  </tr>
+                  <tr>
+                    <td>Change</td>
+                    <td className={`text-right font-bold ${nifty?.change_pct >= 0 ? 'text-green' : 'text-red'}`}>
+                      {nifty?.change_abs > 0 ? '+' : ''}{nifty?.change_abs} ({nifty?.change_pct}%)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          ) : <div className="data-card"><div className="placeholder-content"><div className="spinner" style={{width: 20, height: 20, borderColor: 'var(--text-muted)', borderTopColor: 'var(--blue)', margin: '0 auto', marginBottom: 10}}></div>Analyzing Nifty...</div></div>}
 
           {/* Sector Chart */}
-          <div className="data-card">
-            <h3>Sector Rotation (Day % Change)</h3>
-            <div className="chart-wrapper">
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={sectors} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                  <XAxis dataKey="sector" tick={{fontSize: 10}} interval={0} angle={-45} textAnchor="end" height={50} />
-                  <YAxis tick={{fontSize: 10}} />
-                  <Tooltip cursor={{fill: 'var(--bg-hover)'}} contentStyle={{borderRadius: 2, border: '1px solid var(--border-dark)', fontSize: '12px'}} />
-                  <Bar dataKey="change_pct" radius={[2, 2, 0, 0]}>
-                    {sectors?.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.change_pct >= 0 ? 'var(--green)' : 'var(--red)'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+          {revealedData.sectors ? (
+            <div className="data-card animate-in">
+              <h3>Sector Rotation (Day % Change)</h3>
+              <div className="chart-wrapper">
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={sectors} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                    <XAxis dataKey="sector" tick={{fontSize: 10}} interval={0} angle={-45} textAnchor="end" height={50} />
+                    <YAxis tick={{fontSize: 10}} />
+                    <Tooltip cursor={{fill: 'var(--bg-hover)'}} contentStyle={{borderRadius: 2, border: '1px solid var(--border-dark)', fontSize: '12px'}} />
+                    <Bar dataKey="change_pct" radius={[2, 2, 0, 0]}>
+                      {sectors?.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.change_pct >= 0 ? 'var(--green)' : 'var(--red)'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          </div>
+          ) : <div className="data-card"><div className="placeholder-content"><div className="spinner" style={{width: 20, height: 20, borderColor: 'var(--text-muted)', borderTopColor: 'var(--blue)', margin: '0 auto', marginBottom: 10}}></div>Scanning Sectors...</div></div>}
 
           {/* Top Movers Chart */}
-          <div className="data-card span-full">
-            <h3>Top Movers ({customTickers ? 'Custom Basket' : 'Nifty Basket'})</h3>
-            <div className="chart-wrapper">
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={allMovers} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                  <XAxis dataKey="ticker" tick={{fontSize: 11}} />
-                  <YAxis tick={{fontSize: 10}} />
-                  <Tooltip cursor={{fill: 'var(--bg-hover)'}} contentStyle={{borderRadius: 2, border: '1px solid var(--border-dark)', fontSize: '12px'}} />
-                  <Bar dataKey="change_pct" radius={[2, 2, 0, 0]}>
-                    {allMovers.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.change_pct >= 0 ? 'var(--green)' : 'var(--red)'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+          {revealedData.movers ? (
+            <div className="data-card span-full animate-in">
+              <h3>Top Movers ({customTickers ? 'Custom Basket' : 'Nifty Basket'})</h3>
+              <div className="chart-wrapper">
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={allMovers} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                    <XAxis dataKey="ticker" tick={{fontSize: 11}} />
+                    <YAxis tick={{fontSize: 10}} />
+                    <Tooltip cursor={{fill: 'var(--bg-hover)'}} contentStyle={{borderRadius: 2, border: '1px solid var(--border-dark)', fontSize: '12px'}} />
+                    <Bar dataKey="change_pct" radius={[2, 2, 0, 0]}>
+                      {allMovers.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.change_pct >= 0 ? 'var(--green)' : 'var(--red)'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          </div>
+          ) : <div className="data-card span-full"><div className="placeholder-content"><div className="spinner" style={{width: 20, height: 20, borderColor: 'var(--text-muted)', borderTopColor: 'var(--blue)', margin: '0 auto', marginBottom: 10}}></div>Identifying Movers...</div></div>}
 
         </div>
       </div>
