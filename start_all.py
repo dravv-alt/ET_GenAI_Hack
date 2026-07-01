@@ -28,11 +28,11 @@ def run_process(name, cmd, cwd):
 if __name__ == "__main__":
     processes = []
     
-    # 1. Start Backends
-    processes.append(run_process("Radar Backend", "uvicorn main:app --port 8001", "opportunity-radar/backend"))
-    processes.append(run_process("Chart Backend", "uvicorn main:app --port 8002", "chart-pattern-intel/backend"))
-    processes.append(run_process("ChatGPT Backend", "uvicorn main:app --port 8003", "market-chatgpt/backend"))
-    processes.append(run_process("Video Backend", "uvicorn main:app --port 8004", "market-video-engine/backend"))
+    # 1. Start all FastAPI Backends
+    processes.append(run_process("Radar Backend", "python -m uvicorn main:app --port 8001", "opportunity-radar/backend"))
+    processes.append(run_process("Chart Backend", "python -m uvicorn main:app --port 8002", "chart-pattern-intel/backend"))
+    processes.append(run_process("ChatGPT Backend", "python -m uvicorn main:app --port 8003", "market-chatgpt/backend"))
+    processes.append(run_process("Video Backend", "python -m uvicorn main:app --port 8004", "market-video-engine/backend"))
     
     # 2. Start Frontends (forcing specific ports via Vite)
     processes.append(run_process("Radar Frontend", "npm run dev -- --port 3001", "opportunity-radar/frontend"))

@@ -4,19 +4,10 @@ import './styles.css';
 const API_BASE = 'http://localhost:8004';
 
 export default function App() {
-  const [videoType, setVideoType] = useState('market_wrap');
   const [customTickers, setCustomTickers] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null);
   const [error, setError] = useState(null);
-
-  const videoOptions = [
-    { id: 'market_wrap', label: 'Market Wrap', icon: 'fa-earth-americas' },
-    { id: 'sector_rotation', label: 'Sector Rotation', icon: 'fa-chart-pie' },
-    { id: 'race_chart', label: 'Race Chart', icon: 'fa-flag-checkered' },
-    { id: 'ipo_tracker', label: 'IPO Tracker', icon: 'fa-rocket' },
-    { id: 'full_overview', label: 'Full Overview', icon: 'fa-globe' }
-  ];
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -35,7 +26,7 @@ export default function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          video_type: videoType,
+          video_type: 'full_overview',
           custom_tickers: tickersArray
         }),
       });
@@ -46,7 +37,6 @@ export default function App() {
 
       const data = await response.json();
       
-      // Backend returns video_url like "/video/download/mve_2026...mp4"
       if (data.video_url) {
         setVideoUrl(`${API_BASE}${data.video_url}`);
       } else {
@@ -67,21 +57,6 @@ export default function App() {
         <div className="brand">
           <i className="fa-solid fa-video"></i>
           Market Video Engine
-        </div>
-
-        <div className="section-title">Video Format</div>
-        <div className="type-selector">
-          {videoOptions.map(opt => (
-            <button 
-              key={opt.id}
-              className={`type-pill ${videoType === opt.id ? 'active' : ''}`}
-              onClick={() => setVideoType(opt.id)}
-              disabled={isGenerating}
-            >
-              <i className={`fa-solid ${opt.icon}`}></i>
-              {opt.label}
-            </button>
-          ))}
         </div>
 
         <div className="section-title">Custom Tickers (Optional)</div>
