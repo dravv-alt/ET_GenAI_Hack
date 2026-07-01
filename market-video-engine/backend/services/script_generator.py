@@ -146,10 +146,14 @@ def generate_combined_script(snapshot: dict[str, Any]) -> str:
     # FII/DII (~16 words, 6.7s)
     if flows and (fii != 0 or dii != 0):
         parts.append(f"Foreign institutions showed net {fii_dir} of {abs(fii):.0f} crore, while domestic institutions continued {dii_dir}.")
+    else:
+        parts.append("Institutional flow data is currently unavailable for this specific session, but broader market participation remains active.")
 
     # IPO Tracker (~15 words, 10.7s)
     if ipos:
         parts.append(f"In the primary market, {ipo_name} is seeing strong subscription demand with healthy grey market premiums.")
+    else:
+        parts.append("In the primary market, there are no major new IPO subscriptions active for this particular session.")
 
     # Outro (~5 words, 3.3s)
     parts.append("Will be back with more updates.")
