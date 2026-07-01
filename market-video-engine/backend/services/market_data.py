@@ -219,6 +219,50 @@ def get_top_movers(
 	max_tickers: int = 20,
 	target_date: str | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
+	# Check if target_date is historical
+	is_historical = False
+	if target_date:
+		try:
+			dt = datetime.strptime(target_date, "%Y-%m-%d").date()
+			today = datetime.now().date()
+			if dt < today:
+				is_historical = True
+		except ValueError:
+			pass
+
+	if not is_historical:
+		# Scrape NSE live API for gainers and losers
+		try:
+			s = requests.Session()
+			headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': '*/*'}
+			s.get('https://www.nseindia.com', headers=headers, timeout=5)
+			
+			gainers_resp = s.get('https://www.nseindia.com/api/live-analysis-variations?index=gainers', headers=headers, timeout=5).json()
+			losers_resp = s.get('https://www.nseindia.com/api/live-analysis-variations?index=loosers', headers=headers, timeout=5).json()
+			
+			gainers = []
+			for row in gainers_resp.get('NIFTY', {}).get('data', []):
+				gainers.append({
+					"ticker": row['symbol'],
+					"change_pct": round(float(row['perChange']), 2),
+					"current_price": round(float(row['ltp']), 2),
+				})
+				
+			losers = []
+			for row in losers_resp.get('NIFTY', {}).get('data', []):
+				losers.append({
+					"ticker": row['symbol'],
+					"change_pct": round(float(row['perChange']), 2),
+					"current_price": round(float(row['ltp']), 2),
+				})
+				
+			if gainers and losers:
+				gainers = sorted(gainers, key=lambda x: x['change_pct'], reverse=True)[:n]
+				losers = sorted(losers, key=lambda x: x['change_pct'])[:n]
+				return {"gainers": gainers, "losers": losers}
+		except Exception:
+			pass
+
 	universe = _load_market_universe()
 	fetch_cfg = _load_fetch_config()
 	timeout_sec = _as_float(fetch_cfg.get("timeout_sec", 60), 60.0)
@@ -355,8 +399,28 @@ def get_fii_dii_flows(target_date: str | None = None) -> dict[str, Any]:
 
 
 def get_ipo_data(target_date: str | None = None) -> list[dict[str, Any]]:
-	"""Returns empty list. No historic IPO tracking API is available reliably.
-	Since we strictly enforce NO fallbacks, we simply omit IPOs for historic renders."""
+	"""Scrapes Yahoo Finance IPO calendar. No fallbacks."""
+	dt = target_date if target_date else datetime.now().strftime("%Y-%m-%d")
+	try:
+		url = f'https://finance.yahoo.com/calendar/ipo?day={dt}'
+		headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+		r = requests.get(url, headers=headers, timeout=10)
+		if r.status_code == 200:
+			import bs4
+			soup = bs4.BeautifulSoup(r.text, 'html.parser')
+			table = soup.find('table')
+			if table:
+				ipos = []
+				rows = table.find_all('tr')
+				for row in rows[1:]:
+					cols = row.find_all('td')
+					if len(cols) >= 2:
+						symbol = cols[0].text.strip()
+						name = cols[1].text.strip()
+						ipos.append({"symbol": symbol, "name": name})
+				return ipos
+	except Exception:
+		pass
 	return []
 
 
