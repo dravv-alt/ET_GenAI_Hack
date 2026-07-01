@@ -6,7 +6,7 @@ import './styles.css';
 const API_BASE = 'http://127.0.0.1:8004';
 
 export default function App() {
-  const [targetDate, setTargetDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [targetDate, setTargetDate] = useState(() => new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [videoUrl, setVideoUrl] = useState(null);
@@ -203,7 +203,7 @@ export default function App() {
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
               disabled={isGenerating}
-              max={new Date().toISOString().split('T')[0]}
+              max={new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]}
             />
 
             <button 
