@@ -1,5 +1,18 @@
-# Backend dependencies for Opportunity Radar
+# Backend dependencies for Opportunity Radar (port 8001)
+# Install with: pip install -r requirements.txt
+
+# ── Web framework ──────────────────────────────────────────────────────────────
 fastapi
-uvicorn
+uvicorn[standard]
+
+# ── HTTP + data ────────────────────────────────────────────────────────────────
 requests
+yfinance
+pandas
+
+# ── LLM providers (free tiers) ────────────────────────────────────────────────
+google-generativeai     # Gemini 2.0 Flash — primary LLM (free: 15 RPM, 1500/day)
+groq                    # Groq Llama-3.3-70b — fallback LLM (free tier)
+
+# ── Environment / config ──────────────────────────────────────────────────────
 python-dotenv

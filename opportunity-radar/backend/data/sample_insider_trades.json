@@ -1,0 +1,58 @@
+[
+  {
+    "symbol": "RELIANCE",
+    "acquirer_name": "MUKESH D AMBANI",
+    "acquirer_type": "Promoter",
+    "transaction_type": "Buy",
+    "shares": 500000,
+    "price_per_share": 2475.00,
+    "value_cr": 123.75,
+    "pre_holding_pct": 50.21,
+    "post_holding_pct": 50.28,
+    "date": "2026-03-25",
+    "mode": "Market Purchase",
+    "filing_ref": "SAST-REL-2026-031"
+  },
+  {
+    "symbol": "INFY",
+    "acquirer_name": "NANDAN M NILEKANI",
+    "acquirer_type": "Promoter",
+    "transaction_type": "Buy",
+    "shares": 180000,
+    "price_per_share": 1538.00,
+    "value_cr": 27.68,
+    "pre_holding_pct": 15.42,
+    "post_holding_pct": 15.47,
+    "date": "2026-03-24",
+    "mode": "Market Purchase",
+    "filing_ref": "SAST-INFY-2026-028"
+  },
+  {
+    "symbol": "WIPRO",
+    "acquirer_name": "AZIM H PREMJI",
+    "acquirer_type": "Promoter",
+    "transaction_type": "Sell",
+    "shares": 1200000,
+    "price_per_share": 440.00,
+    "value_cr": 52.80,
+    "pre_holding_pct": 72.93,
+    "post_holding_pct": 72.76,
+    "date": "2026-03-23",
+    "mode": "Off-Market",
+    "filing_ref": "SAST-WIP-2026-025"
+  },
+  {
+    "symbol": "HDFCBANK",
+    "acquirer_name": "SASHIDHAR JAGDISHAN",
+    "acquirer_type": "Director",
+    "transaction_type": "Buy",
+    "shares": 25000,
+    "price_per_share": 1608.00,
+    "value_cr": 4.02,
+    "pre_holding_pct": 0.003,
+    "post_holding_pct": 0.004,
+    "date": "2026-03-22",
+    "mode": "Market Purchase",
+    "filing_ref": "SAST-HDFC-2026-019"
+  }
+]
