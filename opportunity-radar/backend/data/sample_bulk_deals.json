@@ -1,0 +1,68 @@
+[
+  {
+    "symbol": "RELIANCE",
+    "client_name": "RELIANCE INDUSTRIES PROMOTER GROUP",
+    "deal_type": "BUY",
+    "quantity": 850000,
+    "price": 2480.50,
+    "value_cr": 210.84,
+    "date": "2026-03-28",
+    "exchange": "NSE",
+    "note": "Promoter open-market purchase via block window"
+  },
+  {
+    "symbol": "INFY",
+    "client_name": "NARAYANA MURTHY FAMILY TRUST",
+    "deal_type": "BUY",
+    "quantity": 300000,
+    "price": 1540.75,
+    "value_cr": 46.22,
+    "date": "2026-03-27",
+    "exchange": "NSE",
+    "note": "Promoter group accumulation ahead of Q4 results"
+  },
+  {
+    "symbol": "HDFCBANK",
+    "client_name": "SBI MUTUAL FUND",
+    "deal_type": "BUY",
+    "quantity": 4200000,
+    "price": 1612.30,
+    "value_cr": 677.17,
+    "date": "2026-03-28",
+    "exchange": "NSE",
+    "note": "Large institutional accumulation — bulk deal through block window"
+  },
+  {
+    "symbol": "WIPRO",
+    "client_name": "AZIM PREMJI TRUST",
+    "deal_type": "SELL",
+    "quantity": 2000000,
+    "price": 438.60,
+    "value_cr": 87.72,
+    "date": "2026-03-26",
+    "exchange": "NSE",
+    "note": "Promoter partial exit — philanthropic divestiture"
+  },
+  {
+    "symbol": "TATAMOTORS",
+    "client_name": "GOVERNMENT OF SINGAPORE",
+    "deal_type": "BUY",
+    "quantity": 1500000,
+    "price": 812.40,
+    "value_cr": 121.86,
+    "date": "2026-03-28",
+    "exchange": "NSE",
+    "note": "Sovereign wealth fund block deal — institutional accumulation"
+  },
+  {
+    "symbol": "BAJFINANCE",
+    "client_name": "BAJAJ FINSERV PROMOTERS",
+    "deal_type": "BUY",
+    "quantity": 120000,
+    "price": 6890.00,
+    "value_cr": 82.68,
+    "date": "2026-03-27",
+    "exchange": "NSE",
+    "note": "Promoter group incremental purchase at dip"
+  }
+]

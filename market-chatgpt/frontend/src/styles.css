@@ -1,2 +1,29 @@
-/* Global styles for the Market ChatGPT frontend */
-body { font-family: Arial, sans-serif; margin: 0; }
+:root {
+  --bg: #f8f8f8; --bg-white: #ffffff; --bg-hover: #f0f0f0; --bg-zebra: #fafafa;
+  --header: #1a1a1a; --header-sub: #2c2c2c; --header-muted: #3a3a3a;
+  --border: #d8d8d8; --border-dark: #b0b0b0; --border-header: #3a3a3a;
+  --text-primary: #1a1a1a; --text-secondary: #555555; --text-muted: #888888;
+  --text-header: #ffffff; --text-header-dim: #aaaaaa;
+  --green: #16a34a; --green-bg: #f0fdf4; --green-dim: #bbf7d0;
+  --red: #dc2626; --red-bg: #fef2f2; --red-dim: #fecaca;
+  --amber: #d97706; --amber-bg: #fffbeb; --amber-dim: #fde68a;
+  --mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%; background: var(--bg); color: var(--text-primary);
+  font-family: var(--sans); font-size: 13px; line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 0; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse  { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.animate-in { animation: fadeIn 0.15s ease forwards; }
+.pulse      { animation: pulse 1.4s ease infinite; }

@@ -1,0 +1,35 @@
+{
+  "nifty_symbol": "^NSEI",
+  "sample_tickers": [
+    "RELIANCE.NS",
+    "TCS.NS",
+    "HDFCBANK.NS",
+    "INFY.NS",
+    "ICICIBANK.NS",
+    "HINDUNILVR.NS",
+    "ITC.NS",
+    "KOTAKBANK.NS",
+    "LT.NS",
+    "BAJFINANCE.NS",
+    "SBIN.NS",
+    "WIPRO.NS",
+    "AXISBANK.NS",
+    "MARUTI.NS",
+    "ULTRACEMCO.NS",
+    "TITAN.NS",
+    "ASIANPAINT.NS",
+    "SUNPHARMA.NS",
+    "TATAMOTORS.NS",
+    "ONGC.NS"
+  ],
+  "sector_symbols": {
+    "Bank": "^NSEBANK",
+    "IT": "^CNXIT",
+    "Auto": "^CNXAUTO",
+    "Pharma": "^CNXPHARMA",
+    "FMCG": "^CNXFMCG",
+    "Metal": "^CNXMETAL",
+    "Realty": "^CNXREALTY",
+    "Energy": "^CNXENERGY"
+  }
+}

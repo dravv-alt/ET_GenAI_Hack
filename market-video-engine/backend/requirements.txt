@@ -4,6 +4,7 @@ uvicorn
 yfinance
 pandas
 matplotlib
+seaborn
 pillow
 moviepy
 gTTS

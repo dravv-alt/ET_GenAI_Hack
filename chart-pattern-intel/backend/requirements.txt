@@ -4,3 +4,6 @@ uvicorn
 yfinance
 pandas
 python-dotenv
+pydantic
+google-generativeai
+requests

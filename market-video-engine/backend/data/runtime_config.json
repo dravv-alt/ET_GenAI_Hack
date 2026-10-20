@@ -1,0 +1,14 @@
+{
+  "fps": 12,
+  "frame_repeat": 8,
+  "segment_frames": {
+    "market_overview": 18,
+    "gainers": 12,
+    "losers": 12,
+    "sector_rotation": 12,
+    "race_chart": 12,
+    "fii_dii": 10,
+    "ipo_tracker": 16,
+    "outro": 5
+  }
+}

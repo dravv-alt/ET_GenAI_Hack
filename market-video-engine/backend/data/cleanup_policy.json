@@ -1,0 +1,9 @@
+{
+  "enabled": true,
+  "run_on_generate": true,
+  "db_retention_days": 7,
+  "db_max_records": 200,
+  "temp_file_retention_hours": 24,
+  "temp_file_prefix": "mve_",
+  "output_dir": "./output"
+}

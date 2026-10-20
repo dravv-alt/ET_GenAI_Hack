@@ -1,0 +1,22 @@
+{
+  "RELIANCE": {
+    "prev": "We remained cautious in our capital allocation during Q2 FY26 given the global macro uncertainty and softness in refining margins. Our retail and digital segments continued on a steady trajectory, though we flagged headwinds in petrochemicals due to compressed spreads. While Jio subscriber growth has been consistent, ARPU expansion has been slower than anticipated. We remain watchful of regulatory developments and will deploy capital conservatively.",
+    "curr": "We are entering Q3 FY26 with significant confidence. Our green energy investments in solar manufacturing and hydrogen are now showing initial revenue contribution ahead of schedule. Jio's ARPU has expanded by 8.4% YoY driven by the successful 5G monetization. Retail revenue grew 18% YoY — our consumer businesses have never been stronger. We are planning a material capex acceleration in FY27 across all three verticals and expect to announce specific capacity expansion plans at our AGM."
+  },
+  "INFY": {
+    "prev": "Q2 FY26 was a challenging quarter. Deal ramps in North America have been delayed due to client budget freezes particularly in financial services and insurance verticals. We have accordingly revised our full-year revenue guidance to 3.5–5.0% in constant currency, down from our earlier guidance of 4.0–7.0%. Headcount additions will remain muted. Margin management remains our top priority in the near term.",
+    "curr": "We saw meaningful improvement in demand signals through Q3. A record large deal TCV of $4.2 billion this quarter reflects renewed client confidence in discretionary spending. Financial services, our largest vertical, has returned to growth after three subdued quarters. We are reinstating our higher end of revenue guidance at 4.5–6.5% CC growth for FY26. Headcount net addition will resume from Q4. We remain cautiously optimistic but the direction of travel is clearly positive."
+  },
+  "HDFCBANK": {
+    "prev": "Post-merger integration with HDFC Limited has been progressing within our internal timelines, though the near-term impact on NIMs has been as expected — some compression. Deposit mobilization has been a focus area and we have deliberately slowed loan growth to maintain a healthier LDR. We expect margins to remain under pressure in H2 FY26 but are confident that the structural franchise is intact.",
+    "curr": "We are pleased to report that the merger integration impact on NIMs has largely played through. Our NIM guidance is now stable to slightly improving from here. Deposit growth of 16% YoY demonstrates that our retail franchise is very strong. Loan growth is being consciously re-accelerated in the home loan and SME segments. Our credit quality metrics remain among the best in the industry with GNPA at 1.24%. We see a clear runway for re-rating as the merger headwinds fully normalize."
+  },
+  "TCS": {
+    "prev": "Discretionary spending by our clients, particularly in BFSI and retail, remained subdued through Q2. Deal win momentum was steady but with longer ramp-up cycles. We maintained our industry-leading margins through cost discipline but acknowledges that top-line growth will remain muted in the near term.",
+    "curr": "We are seeing a clear inflection in demand. Generative AI-related services contributed $580M in revenue this quarter, growing 72% QoQ, demonstrating that we are successfully monetizing the AI wave. BFSI discretionary budgets have opened up significantly after three quarters of freeze. We won 12 large deals this quarter — a record. Management is confident that FY27 will be a strong growth year. We are increasing campus hiring by 40% for FY27 to prepare for the demand surge."
+  },
+  "SBIN": {
+    "prev": "Our focus this quarter was on deposit mobilization as system liquidity tightened. We saw some moderation in loan growth versus our plan. Slippage ratios remain manageable but we are watchful of stress in the MSME and agri segments given the uneven monsoon impact.",
+    "curr": "NPA ratios are at multi-year lows and we believe the credit cycle is firmly behind us. Our capital position is very comfortable with CET1 at 10.2%, which gives us headroom for growth. Corporate loan demand has picked up meaningfully with infrastructure and renewable energy driving volumes. We expect double-digit credit growth in FY27. ROE trajectory looks positive and we are confident of delivering industry-leading returns."
+  }
+}
